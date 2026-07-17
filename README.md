@@ -22,6 +22,27 @@
 Solution: `Dispatcher.slnx`  
 Namespace: `Dispatcher`
 
-## Текущее состояние
+## Текущий статус
 
-Текущий прогресс проекта фиксируется в `PROJECT_STATE.md`.
+Созданы базовые проекты, Domain-модель, Application-сервисы, EF Core Infrastructure и первые API endpoints.
+
+## API endpoints
+
+Health:
+
+```http
+GET /api/health
+```
+
+Devices:
+
+```http
+GET /api/devices
+GET /api/devices/{id}
+POST /api/devices/modbus-tcp
+POST /api/devices/snmp
+POST /api/devices/{id}/enable
+POST /api/devices/{id}/disable
+```
+
+До создания базы данных и миграций endpoints устройств могут вернуть ошибку подключения или отсутствия таблиц. Это будет исправлено на следующих шагах.

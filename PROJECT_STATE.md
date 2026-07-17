@@ -37,7 +37,8 @@ Main branch: master
 - Application layer defines repository and service contracts.
 - Application service implementations coordinate domain objects through repository interfaces.
 - Infrastructure layer implements persistence contracts with EF Core and PostgreSQL provider.
-- The default development connection string is temporary and will be moved to configuration during API wiring.
+- API uses minimal endpoints grouped by feature.
+- The default development connection string is temporary and will be refined when PostgreSQL setup is finalized.
 - Each assistant step starts with an estimate of remaining steps until the first MVP.
 
 ## Current Solution Structure
@@ -138,28 +139,40 @@ Done:
 Commit:
 - dc9d8f050238494f06a240afa7db6dbf7743f8f2
 
+### Step 06 — Add Application service implementations
+
+Done:
+- Added Application dependency injection extension.
+- Added DeviceService implementation.
+- Added TagService implementation.
+- Added TagValueService implementation.
+- Built solution successfully.
+
+Commit:
+- c81f217a0189b9ba5d0f07f0b4efe99475b24bce
+
 ## Current Step
 
-Step 06 — Add Application service implementations.
+Step 07 — Wire API and add device endpoints.
 
 ## Next Steps
 
-1. Add Application dependency injection extension.
-2. Add DeviceService implementation.
-3. Add TagService implementation.
-4. Add TagValueService implementation.
-5. Build solution.
-6. Commit changes.
+1. Register Application and Infrastructure in API startup.
+2. Remove default WeatherForecast endpoint.
+3. Add health endpoint.
+4. Add device minimal API endpoints.
+5. Add API request contracts for Modbus TCP and SNMP devices.
+6. Add development connection string placeholder.
+7. Build solution.
+8. Commit changes.
 
 ## Backlog
 
 - Alarm entities.
 - Notification entities.
 - User entity.
-- API wiring for Application and Infrastructure.
-- PostgreSQL connection configuration.
+- PostgreSQL connection setup.
 - EF Core migrations.
-- Device CRUD API.
 - Tag CRUD API.
 - Mock polling worker.
 - SignalR realtime updates.
