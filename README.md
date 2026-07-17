@@ -2,26 +2,32 @@
 
 Диспетчер — web-система мониторинга оборудования с аварийной сигнализацией.
 
-## Текущее состояние
+## MVP
 
-В проект добавлены базовые слои Domain, Application, Infrastructure и API.
+Первая версия системы предназначена для чтения данных с устройств по Modbus TCP и SNMP, отображения текущих значений, хранения истории, регистрации аварий и отправки Email-уведомлений.
 
-На Step 11 добавлены endpoints текущих значений тегов:
+## Технологии
 
-- `GET /api/tag-values/current`
-- `GET /api/tag-values/current/{tagId}`
-- `POST /api/tag-values/current`
-- `POST /api/tag-values/current/{tagId}`
-- `GET /api/tags/{tagId}/current-value`
-
-Эти endpoints нужны для будущего polling worker и SignalR realtime-обновлений.
-
-## Важно
-
-PostgreSQL может быть не установлен локально. В этом случае сборка и `/api/health` должны работать, но endpoints данных будут полноценно работать только после запуска PostgreSQL и применения EF Core миграции.
+- ASP.NET Core / C#
+- Blazor WebAssembly
+- SignalR
+- .NET Worker Service
+- Entity Framework Core
+- PostgreSQL
+- TimescaleDB в будущем для истории временных рядов
 
 ## Репозиторий
 
 Репозиторий: `dispatcherV4`  
 Solution: `Dispatcher.slnx`  
 Namespace: `Dispatcher`
+
+## Worker
+
+`Dispatcher.Worker` содержит mock polling worker. Он отключен по умолчанию, потому что локальный PostgreSQL пока не готов.
+
+Документация:
+
+```text
+docs/development/mock-polling-worker.md
+```

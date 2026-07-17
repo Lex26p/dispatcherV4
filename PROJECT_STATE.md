@@ -40,6 +40,7 @@ Main branch: master
 - The default development connection string is temporary and will be moved to secure configuration later.
 - EF Core migrations are generated into `Dispatcher.Infrastructure`.
 - PostgreSQL is not ready locally yet; database update can be postponed.
+- Mock polling worker is disabled by default until PostgreSQL and test tags are ready.
 - Each assistant step starts with an estimate of remaining steps until the first MVP.
 
 ## Current Solution Structure
@@ -206,17 +207,30 @@ Done:
 Commit:
 - 5e837f325984f1cfc7b5f5afae22e5c45ede1e41
 
+### Step 11 — Add current tag value API endpoints
+
+Done:
+- Added current tag value API contract.
+- Added current tag value endpoints.
+- Registered current tag value endpoints in API startup.
+- Built solution successfully.
+
+Commit:
+- ffdca97b4d069ffa1dd10ba0def432f934e4043d
+
 ## Current Step
 
-Step 11 — Add current tag value API endpoints.
+Step 12 — Add mock polling worker.
 
 ## Next Steps
 
-1. Add current tag value API contract.
-2. Add current tag value endpoints.
-3. Register current tag value endpoints in API startup.
-4. Build solution.
-5. Commit changes.
+1. Register Application and Infrastructure services in Worker.
+2. Add mock polling options.
+3. Add mock polling background service.
+4. Keep mock polling disabled by default until PostgreSQL is ready.
+5. Add worker configuration and documentation.
+6. Build solution.
+7. Commit changes.
 
 ## Backlog
 
@@ -224,7 +238,6 @@ Step 11 — Add current tag value API endpoints.
 - Notification entities.
 - User entity.
 - PostgreSQL local setup and database update.
-- Mock polling worker.
 - SignalR realtime updates.
 - Blazor device and tag pages.
 - Modbus TCP polling.
