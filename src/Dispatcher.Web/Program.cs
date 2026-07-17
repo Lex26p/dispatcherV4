@@ -25,4 +25,6 @@ builder.Services.AddScoped(_ => new DispatcherApiClient(new HttpClient
     BaseAddress = dispatcherApiBaseAddress
 }));
 
+builder.Services.AddScoped<TagValueRealtimeClient>();
+
 await builder.Build().RunAsync();

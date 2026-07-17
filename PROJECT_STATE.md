@@ -16,7 +16,6 @@ Main branch: master
 - Database: PostgreSQL, later TimescaleDB
 - ORM: Entity Framework Core
 - Workers: .NET Worker Service
-- High-performance modules: possible future C++ service after performance measurements
 - Development OS: Windows
 - IDE: Visual Studio 2026
 - Target framework: .NET 10
@@ -42,6 +41,7 @@ Main branch: master
 - Mock polling worker is disabled by default until PostgreSQL and test tags are ready.
 - Blazor WebAssembly calls the API through configurable `ApiBaseUrl`.
 - API allows Blazor local development origins with a development CORS policy.
+- Blazor current tag values page uses SignalR for realtime updates.
 - Each assistant step starts with an estimate of remaining steps until the first MVP.
 
 ## Current Solution Structure
@@ -63,16 +63,6 @@ Main branch: master
 ## Completed Steps
 
 ### Step 00 — Planning
-
-Done:
-- Defined product name: Диспетчер.
-- Defined repository name: dispatcherV4.
-- Defined solution name: Dispatcher.slnx.
-- Defined namespace: Dispatcher.
-- Defined MVP stack.
-- Defined workflow with zip archives and PowerShell commands.
-- Decided to work only on master branch.
-- Decided to maintain this PROJECT_STATE.md file after every step.
 
 Commit:
 - Not committed yet.
@@ -153,35 +143,40 @@ Commit:
 
 ### Step 15 — Add Blazor devices UI
 
-Done:
-- Added Blazor device models.
-- Added device API client methods.
-- Added device list page.
-- Added Modbus TCP and SNMP device creation forms.
-- Added enable and disable actions for devices.
-- Built solution successfully.
-
 Commit:
 - 9ae61aaa75bd0ecdea6ed4e3374ab376a8b16ec5
 
+### Step 16 — Add Blazor tags UI
+
+Done:
+- Added Blazor tag models.
+- Added tag API client methods.
+- Replaced the tags placeholder page with a working tag management page.
+- Added documentation for the tags page.
+- Built solution successfully.
+
+Commit:
+- 3e158aad1cd06c2fe24343b410335b0e6aea2f6d
+
 ## Current Step
 
-Step 16 — Add Blazor tags UI.
+Step 17 — Add Blazor current tag values and realtime page.
 
 ## Next Steps
 
-1. Add Blazor tag models.
-2. Add tag API methods to DispatcherApiClient.
-3. Replace the tags placeholder page with a working tag management page.
-4. Add documentation for the tags page.
-5. Build solution.
-6. Commit changes.
+1. Add Blazor SignalR client package reference.
+2. Add current tag value models.
+3. Add current tag value API methods to DispatcherApiClient.
+4. Add TagValueRealtimeClient.
+5. Add current tag values page.
+6. Add navigation and documentation.
+7. Build solution.
+8. Commit changes.
 
 ## Backlog
 
 - PostgreSQL local setup and database update.
-- Blazor realtime client.
-- Blazor current tag value page.
+- Enable mock polling against local database.
 - Modbus TCP polling.
 - SNMP polling.
 - Tag history.

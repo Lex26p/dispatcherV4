@@ -1,0 +1,276 @@
+@page "/tag-values"
+@implements IAsyncDisposable
+@inject DispatcherApiClient ApiClient
+@inject TagValueRealtimeClient RealtimeClient
+
+<PageTitle>Текущие значения</PageTitle>
+
+<div class="d-flex align-items-center justify-content-between gap-3 mb-4">
+    <div>
+        <h1 class="mb-1">Текущие значения</h1>
+        <p class="text-muted mb-0">Последние значения тегов и realtime-обновления SignalR.</p>
+    </div>
+
+    <div class="d-flex gap-2">
+        <button class="btn btn-outline-primary" @onclick="LoadCurrentValuesAsync" disabled="@isLoading">
+            Обновить
+        </button>
+        @if (isRealtimeConnected)
+        {
+            <button class="btn btn-outline-secondary" @onclick="DisconnectRealtimeAsync">
+                Отключить realtime
+            </button>
+        }
+        else
+        {
+            <button class="btn btn-success" @onclick="ConnectRealtimeAsync">
+                Подключить realtime
+            </button>
+        }
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-12 col-lg-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted small">Текущих значений</div>
+                <div class="display-6">@currentValues.Count</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted small">SignalR</div>
+                <div class="h4 mb-0">
+                    <span class="@GetRealtimeBadgeClass()">@realtimeStateText</span>
+                </div>
+                <div class="small text-muted mt-2">@RealtimeClient.HubUrl</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted small">Последнее событие</div>
+                <div class="h5 mb-0">@(lastRealtimeEventUtc?.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss") ?? "—")</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(successMessage))
+{
+    <div class="alert alert-success">@successMessage</div>
+}
+
+@if (!string.IsNullOrWhiteSpace(errorMessage))
+{
+    <div class="alert alert-warning">
+        <strong>Не удалось выполнить запрос.</strong>
+        <div>@errorMessage</div>
+        <div class="small mt-2">
+            Если PostgreSQL пока не готов, это ожидаемо для data-запросов. SignalR endpoint может быть доступен, но snapshot текущих значений появится после базы.
+        </div>
+    </div>
+}
+
+<section class="card shadow-sm">
+    <div class="card-header d-flex align-items-center justify-content-between">
+        <strong>Current tag values</strong>
+        <span class="badge text-bg-secondary">@currentValues.Count</span>
+    </div>
+
+    <div class="card-body">
+        @if (isLoading)
+        {
+            <p class="text-muted mb-0">Загрузка текущих значений…</p>
+        }
+        else if (currentValues.Count == 0)
+        {
+            <div class="alert alert-secondary mb-0">
+                Текущих значений пока нет или data API недоступен без PostgreSQL.
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-sm table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Tag ID</th>
+                            <th>Device ID</th>
+                            <th>Значение</th>
+                            <th>Качество</th>
+                            <th>Время</th>
+                            <th>Ошибка</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var value in currentValues)
+                        {
+                            <tr>
+                                <td><code>@value.TagId</code></td>
+                                <td><code>@value.DeviceId</code></td>
+                                <td class="fw-semibold">@(value.Value ?? "—")</td>
+                                <td><span class="@GetQualityBadgeClass(value.Quality)">@FormatQuality(value.Quality)</span></td>
+                                <td>@value.Timestamp.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")</td>
+                                <td class="text-muted">@(value.ErrorMessage ?? "—")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</section>
+
+@code {
+    private IReadOnlyList<TagValueDto> currentValues = Array.Empty<TagValueDto>();
+    private bool isLoading;
+    private bool isRealtimeConnected;
+    private string realtimeStateText = "Отключено";
+    private string? errorMessage;
+    private string? successMessage;
+    private DateTimeOffset? lastRealtimeEventUtc;
+
+    protected override async Task OnInitializedAsync()
+    {
+        RealtimeClient.TagValueUpdated += OnTagValueUpdatedAsync;
+        RealtimeClient.CurrentValuesSnapshot += OnCurrentValuesSnapshotAsync;
+
+        await LoadCurrentValuesAsync();
+    }
+
+    private async Task LoadCurrentValuesAsync()
+    {
+        isLoading = true;
+        errorMessage = null;
+        successMessage = null;
+
+        try
+        {
+            currentValues = (await ApiClient.GetCurrentTagValuesAsync())
+                .OrderByDescending(value => value.Timestamp)
+                .ToArray();
+        }
+        catch (Exception exception)
+        {
+            currentValues = Array.Empty<TagValueDto>();
+            errorMessage = exception.Message;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task ConnectRealtimeAsync()
+    {
+        errorMessage = null;
+        successMessage = null;
+
+        try
+        {
+            await RealtimeClient.StartAsync();
+            isRealtimeConnected = true;
+            realtimeStateText = "Подключено";
+            successMessage = "Realtime-подключение активно.";
+        }
+        catch (Exception exception)
+        {
+            isRealtimeConnected = false;
+            realtimeStateText = "Ошибка подключения";
+            errorMessage = exception.Message;
+        }
+    }
+
+    private async Task DisconnectRealtimeAsync()
+    {
+        errorMessage = null;
+        successMessage = null;
+
+        try
+        {
+            await RealtimeClient.StopAsync();
+            isRealtimeConnected = false;
+            realtimeStateText = "Отключено";
+            successMessage = "Realtime-подключение остановлено.";
+        }
+        catch (Exception exception)
+        {
+            errorMessage = exception.Message;
+        }
+    }
+
+    private Task OnTagValueUpdatedAsync(TagValueDto value)
+    {
+        var list = currentValues.ToList();
+        var existingIndex = list.FindIndex(currentValue => currentValue.TagId == value.TagId);
+
+        if (existingIndex >= 0)
+        {
+            list[existingIndex] = value;
+        }
+        else
+        {
+            list.Add(value);
+        }
+
+        currentValues = list
+            .OrderByDescending(currentValue => currentValue.Timestamp)
+            .ToArray();
+
+        lastRealtimeEventUtc = DateTimeOffset.UtcNow;
+        return InvokeAsync(StateHasChanged);
+    }
+
+    private Task OnCurrentValuesSnapshotAsync(IReadOnlyList<TagValueDto> values)
+    {
+        currentValues = values
+            .OrderByDescending(value => value.Timestamp)
+            .ToArray();
+
+        lastRealtimeEventUtc = DateTimeOffset.UtcNow;
+        return InvokeAsync(StateHasChanged);
+    }
+
+    private static string FormatQuality(int quality)
+    {
+        return quality switch
+        {
+            1 => "Good",
+            2 => "Bad",
+            3 => "Stale",
+            4 => "Offline",
+            _ => "Unknown"
+        };
+    }
+
+    private static string GetQualityBadgeClass(int quality)
+    {
+        return quality switch
+        {
+            1 => "badge text-bg-success",
+            2 => "badge text-bg-danger",
+            3 => "badge text-bg-warning",
+            4 => "badge text-bg-secondary",
+            _ => "badge text-bg-light"
+        };
+    }
+
+    private string GetRealtimeBadgeClass()
+    {
+        return isRealtimeConnected
+            ? "badge text-bg-success"
+            : "badge text-bg-secondary";
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        RealtimeClient.TagValueUpdated -= OnTagValueUpdatedAsync;
+        RealtimeClient.CurrentValuesSnapshot -= OnCurrentValuesSnapshotAsync;
+        await RealtimeClient.StopAsync();
+    }
+}

@@ -115,6 +115,34 @@ public sealed class DispatcherApiClient
         await EnsureSuccessAsync(response, cancellationToken);
     }
 
+    public async Task<IReadOnlyList<TagValueDto>> GetCurrentTagValuesAsync(CancellationToken cancellationToken = default)
+    {
+        var values = await httpClient.GetFromJsonAsync<TagValueDto[]>("api/tag-values/current", JsonOptions, cancellationToken);
+        return values ?? Array.Empty<TagValueDto>();
+    }
+
+    public async Task<TagValueDto?> GetCurrentTagValueAsync(Guid tagId, CancellationToken cancellationToken = default)
+    {
+        return await httpClient.GetFromJsonAsync<TagValueDto>($"api/tag-values/current/{tagId}", JsonOptions, cancellationToken);
+    }
+
+    public async Task UpsertCurrentTagValueAsync(
+        UpsertTagValueRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await httpClient.PostAsJsonAsync("api/tag-values/current", request, JsonOptions, cancellationToken);
+        await EnsureSuccessAsync(response, cancellationToken);
+    }
+
+    public async Task UpsertCurrentTagValueAsync(
+        Guid tagId,
+        UpsertTagValueRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await httpClient.PostAsJsonAsync($"api/tag-values/current/{tagId}", request, JsonOptions, cancellationToken);
+        await EnsureSuccessAsync(response, cancellationToken);
+    }
+
     private static async Task<T> ReadRequiredAsync<T>(
         HttpResponseMessage response,
         CancellationToken cancellationToken)
