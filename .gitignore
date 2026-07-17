@@ -1,0 +1,32 @@
+# Build results
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider
+.idea/
+
+# VS Code
+.vscode/
+
+# NuGet
+*.nupkg
+packages/
+
+# Logs
+*.log
+logs/
+
+# Local settings
+appsettings.Development.local.json
+appsettings.Local.json
+.env
+
+# Incoming step archives
+.incoming/
