@@ -42,7 +42,6 @@ Main branch: master
 - Mock polling worker is disabled by default until PostgreSQL and test tags are ready.
 - Blazor WebAssembly calls the API through configurable `ApiBaseUrl`.
 - API allows Blazor local development origins with a development CORS policy.
-- Blazor device management UI calls the device API and handles unavailable database/API states gracefully.
 - Each assistant step starts with an estimate of remaining steps until the first MVP.
 
 ## Current Solution Structure
@@ -144,48 +143,45 @@ Commit:
 
 ### Step 13 — Add SignalR realtime API foundation
 
-Done:
-- Added SignalR hub for tag values.
-- Added realtime metadata endpoint.
-- Added tag value broadcaster.
-- Registered realtime services and hub in API startup.
-- Built solution successfully.
-
 Commit:
 - ff061137964ae183c870294ba88bf43538dbd4f5
 
 ### Step 14 — Add Blazor WebAssembly UI foundation
 
-Done:
-- Added Blazor API client configuration.
-- Added Blazor API client service.
-- Added system status page.
-- Added Russian navigation shell.
-- Added placeholder pages for devices and tags.
-- Added development CORS policy in API.
-- Built solution successfully.
-
 Commit:
 - 8f241dce0f24782a85ba570aafcf8b1c74b06403
 
+### Step 15 — Add Blazor devices UI
+
+Done:
+- Added Blazor device models.
+- Added device API client methods.
+- Added device list page.
+- Added Modbus TCP and SNMP device creation forms.
+- Added enable and disable actions for devices.
+- Built solution successfully.
+
+Commit:
+- 9ae61aaa75bd0ecdea6ed4e3374ab376a8b16ec5
+
 ## Current Step
 
-Step 15 — Add Blazor devices UI.
+Step 16 — Add Blazor tags UI.
 
 ## Next Steps
 
-1. Add web models for device DTO and create requests.
-2. Extend Blazor API client with device operations.
-3. Replace the devices placeholder with a real devices page.
-4. Add device UI documentation.
+1. Add Blazor tag models.
+2. Add tag API methods to DispatcherApiClient.
+3. Replace the tags placeholder page with a working tag management page.
+4. Add documentation for the tags page.
 5. Build solution.
 6. Commit changes.
 
 ## Backlog
 
 - PostgreSQL local setup and database update.
-- Blazor tags and current values UI.
 - Blazor realtime client.
+- Blazor current tag value page.
 - Modbus TCP polling.
 - SNMP polling.
 - Tag history.

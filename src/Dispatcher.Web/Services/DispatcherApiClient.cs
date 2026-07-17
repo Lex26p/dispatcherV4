@@ -70,6 +70,51 @@ public sealed class DispatcherApiClient
         await EnsureSuccessAsync(response, cancellationToken);
     }
 
+    public async Task<IReadOnlyList<TagDto>> GetDeviceTagsAsync(
+        Guid deviceId,
+        CancellationToken cancellationToken = default)
+    {
+        var tags = await httpClient.GetFromJsonAsync<TagDto[]>($"api/devices/{deviceId}/tags", JsonOptions, cancellationToken);
+        return tags ?? Array.Empty<TagDto>();
+    }
+
+    public async Task<TagDto?> GetTagAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return await httpClient.GetFromJsonAsync<TagDto>($"api/tags/{id}", JsonOptions, cancellationToken);
+    }
+
+    public async Task<TagDto> CreateModbusTagAsync(
+        CreateModbusTagRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await httpClient.PostAsJsonAsync("api/tags/modbus", request, JsonOptions, cancellationToken);
+        await EnsureSuccessAsync(response, cancellationToken);
+
+        return await ReadRequiredAsync<TagDto>(response, cancellationToken);
+    }
+
+    public async Task<TagDto> CreateSnmpTagAsync(
+        CreateSnmpTagRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await httpClient.PostAsJsonAsync("api/tags/snmp", request, JsonOptions, cancellationToken);
+        await EnsureSuccessAsync(response, cancellationToken);
+
+        return await ReadRequiredAsync<TagDto>(response, cancellationToken);
+    }
+
+    public async Task EnableTagAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var response = await httpClient.PostAsync($"api/tags/{id}/enable", content: null, cancellationToken);
+        await EnsureSuccessAsync(response, cancellationToken);
+    }
+
+    public async Task DisableTagAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var response = await httpClient.PostAsync($"api/tags/{id}/disable", content: null, cancellationToken);
+        await EnsureSuccessAsync(response, cancellationToken);
+    }
+
     private static async Task<T> ReadRequiredAsync<T>(
         HttpResponseMessage response,
         CancellationToken cancellationToken)

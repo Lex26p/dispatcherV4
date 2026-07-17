@@ -1,47 +1,59 @@
 # Диспетчер
 
-Диспетчер — web-система мониторинга оборудования с аварийной сигнализацией.
+SCADA-lite / web-система мониторинга оборудования.
 
-## Текущий статус
+## Текущее состояние
 
-В проекте уже есть:
+Готовы базовые слои Domain, Application, Infrastructure, API, Worker и Blazor WebAssembly UI.
 
-- ASP.NET Core API
-- Blazor WebAssembly UI
-- Application services
-- EF Core infrastructure
-- EF Core migration setup
-- Device API
-- Tag API
-- Current tag value API
-- SignalR realtime foundation
-- Mock polling worker
-- Blazor device management page
+Step 16 добавляет рабочую Blazor-страницу тегов:
 
-## Локальный запуск API
+- выбор устройства;
+- список тегов выбранного устройства;
+- создание Modbus TCP тегов;
+- создание SNMP тегов;
+- включение и отключение тегов;
+- дружелюбное сообщение об ошибке, если PostgreSQL пока не готов.
+
+## Решения
+
+- Product name: Диспетчер
+- Solution: Dispatcher.slnx
+- Main branch: master
+- Target framework: .NET 10
+- Backend: ASP.NET Core
+- Frontend: Blazor WebAssembly
+- ORM: Entity Framework Core
+- Database: PostgreSQL, later TimescaleDB
+- Realtime: SignalR
+- Worker: .NET Worker Service
+
+## Локальная проверка
 
 ```powershell
+cd C:\Projects\dispatcherV4
+dotnet restore .\Dispatcher.slnx
+dotnet build .\Dispatcher.slnx
+```
+
+API:
+
+```powershell
+cd C:\Projects\dispatcherV4
 dotnet run --project .\src\Dispatcher.Api\Dispatcher.Api.csproj
 ```
 
-API по умолчанию:
-
-```text
-http://localhost:5076
-```
-
-## Локальный запуск Blazor
+Blazor:
 
 ```powershell
+cd C:\Projects\dispatcherV4
 dotnet run --project .\src\Dispatcher.Web\Dispatcher.Web.csproj
 ```
 
-Blazor по умолчанию:
+Открыть:
 
 ```text
-http://localhost:5048
+http://localhost:5048/tags
 ```
 
-## PostgreSQL
-
-PostgreSQL пока может быть не готов локально. Сборка проекта и запуск Blazor UI должны проходить без PostgreSQL, но операции чтения/создания устройств требуют работающую базу и примененную миграцию.
+Data-запросы будут полноценно работать после запуска PostgreSQL и применения миграции.
