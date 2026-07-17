@@ -77,23 +77,40 @@ Done:
 Commit:
 - ffda784a074bb43a6930f16708950157923940dd
 
+### Step 02 — Add Domain base classes and enums
+
+Done:
+- Added common Domain base classes: Entity, AggregateRoot, DomainException.
+- Added base enums for devices.
+- Added base enums for tags.
+- Added base enums for alarms.
+- Added base enums for notifications and users.
+- Updated project state file for Dispatcher.slnx.
+- Built solution successfully.
+
+Commit:
+- 71df25e4c2552af05a25f5619d53e23ff1ed0fc9
+
 ## Current Step
 
-Step 02 — Add Domain base classes and enums.
+Step 03 — Add Device and Tag domain entities.
 
 ## Next Steps
 
-1. Add common Domain base classes.
-2. Add base enums for devices.
-3. Add base enums for tags.
-4. Add base enums for alarms.
-5. Add base enums for notifications and users.
-6. Build solution.
-7. Commit changes.
+1. Add Device aggregate.
+2. Add DeviceConnectionSettings value object.
+3. Add ModbusTagAddress value object.
+4. Add SnmpTagAddress value object.
+5. Add Tag aggregate.
+6. Add TagValue entity for current values.
+7. Build solution.
+8. Commit changes.
 
 ## Backlog
 
-- Domain entities.
+- Alarm entities.
+- Notification entities.
+- User entity.
 - Application interfaces.
 - EF Core infrastructure.
 - PostgreSQL connection.

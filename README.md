@@ -18,5 +18,5 @@
 ## Репозиторий
 
 Репозиторий: `dispatcherV4`  
-Solution: `Dispatcher.sln`  
+Solution: `Dispatcher.slnx`  
 Namespace: `Dispatcher`
