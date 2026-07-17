@@ -2,39 +2,46 @@
 
 Диспетчер — web-система мониторинга оборудования с аварийной сигнализацией.
 
-## MVP
-
-Первая версия системы предназначена для чтения данных с устройств по Modbus TCP и SNMP, отображения текущих значений, хранения истории, регистрации аварий и отправки Email-уведомлений.
-
-## Технологии
-
-- ASP.NET Core / C#
-- Blazor WebAssembly
-- SignalR
-- .NET Worker Service
-- PostgreSQL
-- Entity Framework Core
-- TimescaleDB в будущем для истории временных рядов
-
-## Репозиторий
-
-Репозиторий: `dispatcherV4`  
-Solution: `Dispatcher.slnx`  
-Namespace: `Dispatcher`
-
 ## Текущий статус
 
-Сейчас добавлены:
+В проекте уже есть:
 
-- Domain base types.
-- Device and Tag domain entities.
-- Application contracts and services.
-- EF Core infrastructure and migration tooling.
-- Device API endpoints.
-- Tag API endpoints.
-- Current tag value API endpoints.
-- Mock polling worker.
-- SignalR realtime API foundation.
-- Blazor WebAssembly UI foundation.
+- ASP.NET Core API
+- Blazor WebAssembly UI
+- Application services
+- EF Core infrastructure
+- EF Core migration setup
+- Device API
+- Tag API
+- Current tag value API
+- SignalR realtime foundation
+- Mock polling worker
+- Blazor device management page
 
-PostgreSQL пока не готов локально, поэтому database update и data endpoints можно проверить позже.
+## Локальный запуск API
+
+```powershell
+dotnet run --project .\src\Dispatcher.Api\Dispatcher.Api.csproj
+```
+
+API по умолчанию:
+
+```text
+http://localhost:5076
+```
+
+## Локальный запуск Blazor
+
+```powershell
+dotnet run --project .\src\Dispatcher.Web\Dispatcher.Web.csproj
+```
+
+Blazor по умолчанию:
+
+```text
+http://localhost:5048
+```
+
+## PostgreSQL
+
+PostgreSQL пока может быть не готов локально. Сборка проекта и запуск Blazor UI должны проходить без PostgreSQL, но операции чтения/создания устройств требуют работающую базу и примененную миграцию.

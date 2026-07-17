@@ -42,6 +42,7 @@ Main branch: master
 - Mock polling worker is disabled by default until PostgreSQL and test tags are ready.
 - Blazor WebAssembly calls the API through configurable `ApiBaseUrl`.
 - API allows Blazor local development origins with a development CORS policy.
+- Blazor device management UI calls the device API and handles unavailable database/API states gracefully.
 - Each assistant step starts with an estimate of remaining steps until the first MVP.
 
 ## Current Solution Structure
@@ -153,26 +154,38 @@ Done:
 Commit:
 - ff061137964ae183c870294ba88bf43538dbd4f5
 
+### Step 14 — Add Blazor WebAssembly UI foundation
+
+Done:
+- Added Blazor API client configuration.
+- Added Blazor API client service.
+- Added system status page.
+- Added Russian navigation shell.
+- Added placeholder pages for devices and tags.
+- Added development CORS policy in API.
+- Built solution successfully.
+
+Commit:
+- 8f241dce0f24782a85ba570aafcf8b1c74b06403
+
 ## Current Step
 
-Step 14 — Add Blazor WebAssembly UI foundation.
+Step 15 — Add Blazor devices UI.
 
 ## Next Steps
 
-1. Add Blazor API client configuration.
-2. Add Blazor API client service.
-3. Add system status page.
-4. Add Russian navigation shell.
-5. Add placeholder pages for devices and tags.
-6. Add development CORS policy in API.
-7. Build solution.
-8. Commit changes.
+1. Add web models for device DTO and create requests.
+2. Extend Blazor API client with device operations.
+3. Replace the devices placeholder with a real devices page.
+4. Add device UI documentation.
+5. Build solution.
+6. Commit changes.
 
 ## Backlog
 
 - PostgreSQL local setup and database update.
+- Blazor tags and current values UI.
 - Blazor realtime client.
-- Blazor device and tag pages with real data.
 - Modbus TCP polling.
 - SNMP polling.
 - Tag history.
