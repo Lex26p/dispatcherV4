@@ -37,8 +37,8 @@ Main branch: master
 - Application layer defines repository and service contracts.
 - Application service implementations coordinate domain objects through repository interfaces.
 - Infrastructure layer implements persistence contracts with EF Core and PostgreSQL provider.
-- API uses minimal endpoints grouped by feature.
-- The default development connection string is temporary and will be refined when PostgreSQL setup is finalized.
+- The default development connection string is temporary and will be moved to secure configuration later.
+- EF Core migrations are generated into `Dispatcher.Infrastructure`.
 - Each assistant step starts with an estimate of remaining steps until the first MVP.
 
 ## Current Solution Structure
@@ -52,6 +52,9 @@ Main branch: master
  ├─ Dispatcher.Domain
  ├─ Dispatcher.Infrastructure
  └─ Dispatcher.Shared
+
+/docs
+ └─ development
 ```
 
 ## Completed Steps
@@ -151,18 +154,32 @@ Done:
 Commit:
 - c81f217a0189b9ba5d0f07f0b4efe99475b24bce
 
+### Step 07 — Wire API and add device endpoints
+
+Done:
+- Connected API to Application layer.
+- Connected API to Infrastructure layer.
+- Added health endpoint.
+- Added device endpoints.
+- Removed default WeatherForecast endpoint.
+- Verified API starts on localhost.
+- Built solution successfully.
+
+Commit:
+- 4af0e4d875c796c7569fb1f55f5ca55cc3dbb38f
+
 ## Current Step
 
-Step 07 — Wire API and add device endpoints.
+Step 08 — Add EF Core migration tooling and create initial database migration.
 
 ## Next Steps
 
-1. Register Application and Infrastructure in API startup.
-2. Remove default WeatherForecast endpoint.
-3. Add health endpoint.
-4. Add device minimal API endpoints.
-5. Add API request contracts for Modbus TCP and SNMP devices.
-6. Add development connection string placeholder.
+1. Add local dotnet-ef tool manifest.
+2. Add EF Core design package references.
+3. Add design-time DispatcherDbContext factory.
+4. Keep HTTPS redirection disabled in Development to avoid local HTTP warning noise.
+5. Generate InitialCreate migration.
+6. Optionally apply migration to local PostgreSQL.
 7. Build solution.
 8. Commit changes.
 
@@ -171,9 +188,8 @@ Step 07 — Wire API and add device endpoints.
 - Alarm entities.
 - Notification entities.
 - User entity.
-- PostgreSQL connection setup.
-- EF Core migrations.
 - Tag CRUD API.
+- Current tag value API.
 - Mock polling worker.
 - SignalR realtime updates.
 - Blazor device and tag pages.

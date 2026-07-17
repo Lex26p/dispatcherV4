@@ -22,27 +22,18 @@
 Solution: `Dispatcher.slnx`  
 Namespace: `Dispatcher`
 
-## Текущий статус
+## Локальная база данных
 
-Созданы базовые проекты, Domain-модель, Application-сервисы, EF Core Infrastructure и первые API endpoints.
+Для разработки используется PostgreSQL.
 
-## API endpoints
+Строка подключения по умолчанию:
 
-Health:
-
-```http
-GET /api/health
+```text
+Host=localhost;Port=5432;Database=dispatcher;Username=postgres;Password=postgres
 ```
 
-Devices:
+Инструкции по миграциям находятся в:
 
-```http
-GET /api/devices
-GET /api/devices/{id}
-POST /api/devices/modbus-tcp
-POST /api/devices/snmp
-POST /api/devices/{id}/enable
-POST /api/devices/{id}/disable
+```text
+docs/development/database.md
 ```
-
-До создания базы данных и миграций endpoints устройств могут вернуть ошибку подключения или отсутствия таблиц. Это будет исправлено на следующих шагах.
