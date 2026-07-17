@@ -33,6 +33,7 @@ Main branch: master
 - Work is done in the master branch.
 - Terminal commands are written as one command per line.
 - The solution uses the Visual Studio solution file format `Dispatcher.slnx`.
+- Application layer defines repository and service contracts, but concrete persistence is implemented later in Infrastructure.
 
 ## Current Solution Structure
 
@@ -91,27 +92,39 @@ Done:
 Commit:
 - 71df25e4c2552af05a25f5619d53e23ff1ed0fc9
 
+### Step 03 — Add Device and Tag domain entities
+
+Done:
+- Added Device aggregate.
+- Added DeviceConnectionSettings value object.
+- Added ModbusTagAddress value object.
+- Added SnmpTagAddress value object.
+- Added Tag aggregate.
+- Added TagValue entity for current values.
+- Built solution successfully.
+
+Commit:
+- 788ffa51f9fdad613ef75a82c4db9d71d1a4063c
+
 ## Current Step
 
-Step 03 — Add Device and Tag domain entities.
+Step 04 — Add Application contracts for devices, tags and current values.
 
 ## Next Steps
 
-1. Add Device aggregate.
-2. Add DeviceConnectionSettings value object.
-3. Add ModbusTagAddress value object.
-4. Add SnmpTagAddress value object.
-5. Add Tag aggregate.
-6. Add TagValue entity for current values.
-7. Build solution.
-8. Commit changes.
+1. Add repository interfaces for devices, tags and current values.
+2. Add UnitOfWork and Clock abstractions.
+3. Add Application DTOs for devices, tags and current values.
+4. Add Application service contracts for devices, tags and current values.
+5. Build solution.
+6. Commit changes.
 
 ## Backlog
 
 - Alarm entities.
 - Notification entities.
 - User entity.
-- Application interfaces.
+- Application service implementations.
 - EF Core infrastructure.
 - PostgreSQL connection.
 - Device CRUD API.
