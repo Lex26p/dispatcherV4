@@ -12,8 +12,8 @@
 - Blazor WebAssembly
 - SignalR
 - .NET Worker Service
-- Entity Framework Core
 - PostgreSQL
+- Entity Framework Core
 - TimescaleDB в будущем для истории временных рядов
 
 ## Репозиторий
@@ -22,11 +22,6 @@
 Solution: `Dispatcher.slnx`  
 Namespace: `Dispatcher`
 
-## Текущий статус
+## Текущее состояние
 
-- Создана структура solution.
-- Добавлены базовые проекты.
-- Добавлена основа Domain-модели.
-- Добавлены сущности устройств, тегов и текущих значений.
-- Добавлены контракты Application layer для устройств, тегов и текущих значений.
-- Добавлен Infrastructure persistence layer на EF Core с PostgreSQL provider.
+Текущий прогресс проекта фиксируется в `PROJECT_STATE.md`.

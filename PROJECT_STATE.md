@@ -35,8 +35,10 @@ Main branch: master
 - Terminal commands are written as one command per line.
 - The solution uses the Visual Studio solution file format `Dispatcher.slnx`.
 - Application layer defines repository and service contracts.
+- Application service implementations coordinate domain objects through repository interfaces.
 - Infrastructure layer implements persistence contracts with EF Core and PostgreSQL provider.
 - The default development connection string is temporary and will be moved to configuration during API wiring.
+- Each assistant step starts with an estimate of remaining steps until the first MVP.
 
 ## Current Solution Structure
 
@@ -122,28 +124,39 @@ Done:
 Commit:
 - 4c3876b75a0b7ab8dc83083df2bd457774db4dc9
 
+### Step 05 — Add Infrastructure EF Core persistence
+
+Done:
+- Added EF Core package references to Dispatcher.Infrastructure.
+- Added DispatcherDbContext.
+- Added EF Core configurations for Device, Tag and TagValue.
+- Added repository implementations for devices, tags and current tag values.
+- Added SystemClock implementation.
+- Added Infrastructure dependency injection extension.
+- Built solution successfully.
+
+Commit:
+- dc9d8f050238494f06a240afa7db6dbf7743f8f2
+
 ## Current Step
 
-Step 05 — Add Infrastructure EF Core persistence.
+Step 06 — Add Application service implementations.
 
 ## Next Steps
 
-1. Add EF Core package references to Dispatcher.Infrastructure.
-2. Add DispatcherDbContext.
-3. Add EF Core entity configurations for Device, Tag and TagValue.
-4. Add repository implementations.
-5. Add SystemClock implementation.
-6. Add Infrastructure dependency injection extension.
-7. Build solution.
-8. Commit changes.
+1. Add Application dependency injection extension.
+2. Add DeviceService implementation.
+3. Add TagService implementation.
+4. Add TagValueService implementation.
+5. Build solution.
+6. Commit changes.
 
 ## Backlog
 
 - Alarm entities.
 - Notification entities.
 - User entity.
-- Application service implementations.
-- API wiring for Infrastructure.
+- API wiring for Application and Infrastructure.
 - PostgreSQL connection configuration.
 - EF Core migrations.
 - Device CRUD API.
