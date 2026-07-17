@@ -1,0 +1,11 @@
+@page "/"
+@inject NavigationManager Navigation
+
+<p>Переход на рабочий стол...</p>
+
+@code {
+    protected override void OnInitialized()
+    {
+        Navigation.NavigateTo("/home", replace: true);
+    }
+}

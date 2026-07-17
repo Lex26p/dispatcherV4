@@ -1,0 +1,23 @@
+@inherits LayoutComponentBase
+
+<div class="app-shell">
+    <header class="global-header">
+        <a class="skip-link" href="#workspace">Перейти к рабочей области</a>
+        <div class="brand-mark">D</div>
+        <div>
+            <strong>Диспетчер</strong>
+            <span>Industrial baseline</span>
+        </div>
+    </header>
+
+    <div class="body-shell">
+        <nav class="navigation-rail" aria-label="Основная навигация">
+            <NavLink href="/home" Match="NavLinkMatch.All">Главная</NavLink>
+            <NavLink href="/not-found">404</NavLink>
+        </nav>
+
+        <main id="workspace" class="workspace" tabindex="-1">
+            @Body
+        </main>
+    </div>
+</div>

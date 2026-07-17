@@ -1,15 +1,12 @@
 # Диспетчер
 
-`Диспетчер` — промышленная web-платформа диспетчеризации, мониторинга, событий, аварий, инцидентов и эксплуатационных работ.
+Промышленная web-платформа диспетчеризации, событий, аварий, инцидентов и эксплуатации распределенных объектов.
 
-Репозиторий очищен от тренировочного прототипа и используется как промышленный baseline для пошаговой разработки по AI-focused execution guide.
+## Документы-источники
 
-## Источники истины
-
-- `DISPATCHER_TECHNICAL_SPECIFICATION_AND_ROADMAP.md` — master-ТЗ и стратегическая дорожная карта.
-- `DISPATCHER_AI_IMPLEMENTATION_SPEC.md` — обязательная инструкция для пошаговой реализации ИИ-агентом.
-- `PROJECT_STATE.md` — текущее состояние репозитория; обновляется после каждого шага.
-- `docs/reference/` — исходные продуктовые и UX-материалы, включая Core UI prototype.
+- `DISPATCHER_TECHNICAL_SPECIFICATION_AND_ROADMAP.md` — master-ТЗ и дорожная карта.
+- `DISPATCHER_AI_IMPLEMENTATION_SPEC.md` — execution guide для пошаговой разработки ИИ-агентом.
+- `PROJECT_STATE.md` — текущее состояние репозитория.
 
 ## Стек первого промышленного релиза
 
@@ -20,31 +17,44 @@
 - SignalR
 - .NET Worker Services
 
-C++ не используется в первом MVP. Потенциальные C++-ready сервисы проектируются через стабильные контракты и оцениваются только после метрик нагрузки.
+## Текущее состояние
 
-## Текущий этап
+Step 1 создает минимальный solution skeleton.
 
-Выполнены подготовительные шаги:
+## Быстрая проверка
 
-```text
-Step 0A — Repository cleanup and baseline reset
-Step 0  — Repository preparation
+```powershell
+cd C:\Projects\dispatcherV4
 ```
 
-Следующий рабочий шаг:
-
-```text
-Step 1 — solution skeleton
+```powershell
+dotnet restore .\Dispatcher.sln
 ```
 
-## Рабочие правила
+```powershell
+dotnet build .\Dispatcher.sln --no-restore
+```
 
-- Не переписывать Git-историю без отдельного решения.
-- Не возвращать старую модель `Device/Tag` как центр продукта.
-- Не начинать C++, visual editors, real command execution или full microservices до соответствующих gates.
-- Каждый шаг должен завершаться обновлением `PROJECT_STATE.md`.
-- Каждый кодовый шаг должен собираться и иметь минимальные проверки.
+```powershell
+dotnet test .\Dispatcher.sln --no-build
+```
 
-## Локальная разработка
+## Запуск API
 
-См. `docs/runbooks/local-development.md`.
+```powershell
+dotnet run --project .\src\Dispatcher.Api\Dispatcher.Api.csproj
+```
+
+Проверка:
+
+```powershell
+Invoke-RestMethod http://localhost:5076/api/health/live
+```
+
+## Запуск Web
+
+```powershell
+dotnet run --project .\src\Dispatcher.Web\Dispatcher.Web.csproj
+```
+
+Открыть `/home` по URL, который покажет `dotnet run`.

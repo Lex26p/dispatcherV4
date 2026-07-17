@@ -6,39 +6,46 @@
 - Master specification: DISPATCHER_TECHNICAL_SPECIFICATION_AND_ROADMAP.md
 - AI guide: DISPATCHER_AI_IMPLEMENTATION_SPEC.md
 - Stack: .NET / ASP.NET Core / Blazor / PostgreSQL / SignalR / Worker Services
-- Target branch: master
 
 ## Current phase
-- Phase: Preparation
-- Status: Completed
+- Phase: Foundation
+- Status: In progress
 
 ## Current sprint
 - Sprint: 1
 - Goal: Архитектурный baseline и рабочий репозиторий
 
 ## Current step
-- Step: 0
-- Name: Repository preparation
-- Status: Pending commit
+- Step: 1
+- Name: solution skeleton
+- Status: Ready for local verification
 - Started: 2026-07-18T00:00:00Z
-- Completed: 2026-07-18T00:00:00Z
+- Completed: pending local verification and commit
 
 ## Completed steps
 | Step | Date UTC | Commit | Result | Notes |
 |---|---|---|---|---|
-| 0A | 2026-07-18 | 4c889a93c62a2612cac4651029d39d5f4113742d | Repository cleanup baseline committed | Старый тренировочный код удалён обычным commit без переписывания Git history. |
-| 0 | pending | pending | Repository preparation completed | Источники истины, ADR, runbook и PROJECT_STATE зафиксированы; solution ещё не создан. |
+| 0A | 2026-07-18 | 4c889a93c62a2612cac4651029d39d5f4113742d | Repository cleanup and industrial baseline reset | Old training code removed without rewriting Git history |
+| 0 | 2026-07-18 | 4b9ef12bac7a5acff540b11daba07c9c65d9504f | Repository preparation completed | Root documentation and AI guide baseline committed |
 
 ## Architecture decisions
 | ADR | Decision | Status | Consequences |
 |---|---|---|---|
-| ADR-0001 | Industrial Dispatcher baseline starts from clean repository contents while preserving Git history | Accepted | Старый учебный код не переносится автоматически; product architecture follows master-ТЗ and AI guide. |
-| ADR-0001 | First industrial release uses C#/.NET, ASP.NET Core, Blazor, PostgreSQL, SignalR and .NET Worker Services | Accepted | C++ рассматривается только как future extraction после метрик и стабильных контрактов. |
+| ADR-0001 | Use C#/.NET, ASP.NET Core, Blazor, PostgreSQL, SignalR and .NET Worker Services as first industrial baseline | Accepted | C++ is deferred to future measured extraction candidates |
 
 ## Created projects
 | Project | Purpose | Created in step | Build status |
 |---|---|---|---|
-| none | Solution skeleton is not created yet | n/a | n/a |
+| Dispatcher.Api | ASP.NET Core API composition root and health endpoints | 1 | To verify locally |
+| Dispatcher.Web | Blazor WebAssembly shell skeleton and `/home` route | 1 | To verify locally |
+| Dispatcher.Domain | Domain primitives and future bounded-context folders | 1 | To verify locally |
+| Dispatcher.Application | Application abstractions and dependency registration | 1 | To verify locally |
+| Dispatcher.Infrastructure | Infrastructure adapters baseline and system clock | 1 | To verify locally |
+| Dispatcher.Contracts | Public REST/SignalR contracts baseline | 1 | To verify locally |
+| Dispatcher.Telemetry.Worker | Future telemetry runtime host skeleton | 1 | To verify locally |
+| Dispatcher.Workers | Future background jobs host skeleton | 1 | To verify locally |
+| Dispatcher.UnitTests | Unit test project | 1 | To verify locally |
+| Dispatcher.IntegrationTests | Integration test project | 1 | To verify locally |
 
 ## Database status
 - Provider: PostgreSQL
@@ -51,35 +58,40 @@
 ## Migrations
 | Migration | Step | Applied locally | Roll-forward tested | Notes |
 |---|---|---|---|---|
-| none | n/a | No | No | Database infrastructure starts in Step 4. |
+| None | 1 | No | No | Database infrastructure starts at Step 4 |
 
 ## API endpoints
 | Method | Route | Authorization | Implemented in step | Tests |
 |---|---|---|---|---|
-| none | n/a | n/a | n/a | API solution starts in Step 1. |
+| GET | `/api/health/live` | Anonymous | 1 | Manual smoke required |
+| GET | `/api/health/ready` | Anonymous | 1 | Manual smoke required |
+| GET | `/` | Anonymous | 1 | Redirects to `/api/health/live`; manual smoke required |
 
 ## Frontend routes
 | Route | Status | Authorization UX | Smoke test |
 |---|---|---|---|
-| none | Not implemented | n/a | No |
+| `/` | Redirects to `/home` | None yet | Manual browser smoke required |
+| `/home` | Implemented skeleton | None yet | Manual browser smoke required |
+| `/not-found` | Implemented skeleton | None yet | Manual browser smoke required |
 
 ## Workers
 | Worker/job | Host | Schedule/trigger | Health/metrics | Status |
 |---|---|---|---|---|
-| none | n/a | n/a | n/a | Worker hosts start in Step 1. |
+| Telemetry Worker skeleton | Dispatcher.Telemetry.Worker | BackgroundService placeholder | Logs startup | To verify locally |
+| General Worker skeleton | Dispatcher.Workers | BackgroundService placeholder | Logs startup | To verify locally |
 
 ## Known limitations
-- Repository contains documentation baseline only after Step 0.
-- No .NET solution exists until Step 1.
-- No API, UI, database, workers or tests exist yet.
-- Existing Git history still contains earlier training prototype commits; this is intentional and not a production code dependency.
+- No PostgreSQL integration yet; planned for Step 4.
+- No authentication/RBAC yet; planned for Step 5.
+- No real telemetry, SignalR, dashboards, alarms or maintenance yet.
+- Build and tests must be verified locally after applying Step 1 archive.
 
 ## Next steps
-1. Step 1 — solution skeleton.
-2. Step 2 — shared contracts and project state.
+1. Step 2 — shared contracts and project state.
 
 ## Commit hash history
 | Date UTC | Step | Commit hash | Message |
 |---|---|---|---|
 | 2026-07-18 | 0A | 4c889a93c62a2612cac4651029d39d5f4113742d | Step 0A: Reset repository for industrial Dispatcher baseline |
-| pending | 0 | pending | Step 0: Complete repository preparation |
+| 2026-07-18 | 0 | 4b9ef12bac7a5acff540b11daba07c9c65d9504f | Step 0: Complete repository preparation |
+| 2026-07-18 | 1 | pending | Step 1: Add solution skeleton |
