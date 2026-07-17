@@ -22,19 +22,19 @@
 Solution: `Dispatcher.slnx`  
 Namespace: `Dispatcher`
 
-## Текущее состояние
+## Текущий статус
 
-Реализованы:
+Сейчас добавлены:
 
-- базовая Domain-модель;
-- Application contracts;
-- Application services;
-- EF Core Infrastructure;
-- API endpoints для устройств;
-- API endpoints для тегов;
-- API endpoints для текущих значений тегов;
-- EF Core migration setup;
-- mock polling worker;
-- SignalR hub для realtime-обновлений текущих значений тегов.
+- Domain base types.
+- Device and Tag domain entities.
+- Application contracts and services.
+- EF Core infrastructure and migration tooling.
+- Device API endpoints.
+- Tag API endpoints.
+- Current tag value API endpoints.
+- Mock polling worker.
+- SignalR realtime API foundation.
+- Blazor WebAssembly UI foundation.
 
-PostgreSQL пока может быть не готов локально. В этом случае database update и data endpoints можно проверить позже.
+PostgreSQL пока не готов локально, поэтому database update и data endpoints можно проверить позже.

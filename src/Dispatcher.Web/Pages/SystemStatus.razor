@@ -1,0 +1,111 @@
+@page "/system-status"
+@inject DispatcherApiClient ApiClient
+
+<PageTitle>Состояние системы</PageTitle>
+
+<h1>Состояние системы</h1>
+
+<p>
+    Эта страница проверяет соединение Blazor WebAssembly с API и realtime metadata endpoint.
+</p>
+
+<button class="btn btn-primary mb-3" @onclick="LoadAsync" disabled="@isLoading">
+    @(isLoading ? "Проверка..." : "Обновить состояние")
+</button>
+
+@if (!string.IsNullOrWhiteSpace(errorMessage))
+{
+    <div class="alert alert-danger">
+        <strong>Ошибка:</strong> @errorMessage
+    </div>
+}
+
+<div class="row g-3">
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">API health</div>
+            <div class="card-body">
+                @if (health is null)
+                {
+                    <p class="text-muted">Данные еще не загружены.</p>
+                }
+                else
+                {
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">Product</dt>
+                        <dd class="col-sm-8">@health.Product</dd>
+
+                        <dt class="col-sm-4">Service</dt>
+                        <dd class="col-sm-8">@health.Service</dd>
+
+                        <dt class="col-sm-4">Status</dt>
+                        <dd class="col-sm-8">@health.Status</dd>
+
+                        <dt class="col-sm-4">Timestamp UTC</dt>
+                        <dd class="col-sm-8">@health.TimestampUtc</dd>
+                    </dl>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">Realtime</div>
+            <div class="card-body">
+                @if (realtime is null)
+                {
+                    <p class="text-muted">Данные еще не загружены.</p>
+                }
+                else
+                {
+                    <dl class="row mb-0">
+                        <dt class="col-sm-5">Hub</dt>
+                        <dd class="col-sm-7">@realtime.TagValuesHub</dd>
+
+                        <dt class="col-sm-5">All group</dt>
+                        <dd class="col-sm-7">@realtime.Groups?.AllTagValues</dd>
+
+                        <dt class="col-sm-5">Update event</dt>
+                        <dd class="col-sm-7">@realtime.ClientEvents?.TagValueUpdated</dd>
+
+                        <dt class="col-sm-5">Snapshot event</dt>
+                        <dd class="col-sm-7">@realtime.ClientEvents?.CurrentValuesSnapshot</dd>
+                    </dl>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private bool isLoading;
+    private string? errorMessage;
+    private ApiHealthResponse? health;
+    private RealtimeInfoResponse? realtime;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            health = await ApiClient.GetHealthAsync();
+            realtime = await ApiClient.GetRealtimeInfoAsync();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"{ex.GetType().Name}: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}
