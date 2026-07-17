@@ -5,14 +5,22 @@ charset = utf-8
 end_of_line = crlf
 insert_final_newline = true
 trim_trailing_whitespace = true
-
-[*.cs]
 indent_style = space
 indent_size = 4
 
-[*.{json,razor,cshtml,html,css,js,md,yml,yaml}]
-indent_style = space
-indent_size = 2
-
 [*.md]
 trim_trailing_whitespace = false
+
+[*.{yml,yaml,json,css,js,html}]
+indent_size = 2
+
+[*.sh]
+end_of_line = lf
+
+[*.cs]
+indent_size = 4
+csharp_style_namespace_declarations = file_scoped:suggestion
+dotnet_style_qualification_for_field = false:suggestion
+dotnet_style_qualification_for_property = false:suggestion
+dotnet_style_qualification_for_method = false:suggestion
+dotnet_style_qualification_for_event = false:suggestion

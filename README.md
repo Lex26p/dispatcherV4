@@ -1,15 +1,51 @@
-# Диспетчер — Step 17
+# Диспетчер
 
-Step 17 adds the Blazor current tag values page and SignalR realtime client.
+`Диспетчер` — промышленная web-платформа диспетчеризации, мониторинга, событий, аварий, инцидентов и эксплуатационных работ.
 
-## Added
+Этот репозиторий очищен от тренировочного прототипа и используется как промышленный baseline для пошаговой разработки по AI-focused execution guide.
 
-- Blazor SignalR client package reference.
-- `TagValueDto` and `UpsertTagValueRequest` models.
-- Current tag value API methods in `DispatcherApiClient`.
-- `TagValueRealtimeClient` service.
-- `/tag-values` page.
-- Navigation link for current values.
-- Documentation for the realtime values page.
+## Источники истины
 
-PostgreSQL is not required for building the solution. Data requests require PostgreSQL and applied migrations.
+- `DISPATCHER_TECHNICAL_SPECIFICATION_AND_ROADMAP.md` — master-ТЗ и стратегическая дорожная карта.
+- `DISPATCHER_AI_IMPLEMENTATION_SPEC.md` — обязательная инструкция для пошаговой реализации ИИ-агентом.
+- `PROJECT_STATE.md` — текущее состояние репозитория; обновляется после каждого шага.
+- `docs/reference/` — исходные продуктовые и UX-материалы, включая Core UI prototype.
+
+## Стек первого промышленного релиза
+
+- C# / .NET
+- ASP.NET Core
+- Blazor
+- PostgreSQL
+- SignalR
+- .NET Worker Services
+
+C++ не используется в первом MVP. Потенциальные C++-ready сервисы проектируются через стабильные контракты и оцениваются только после метрик нагрузки.
+
+## Текущий этап
+
+Сейчас репозиторий находится на этапе `Step 0A — Repository cleanup and baseline reset`.
+
+Следующий официальный шаг по AI guide:
+
+```text
+Step 0 — подготовка репозитория
+```
+
+После него начинается:
+
+```text
+Step 1 — solution skeleton
+```
+
+## Рабочие правила
+
+- Не переписывать Git-историю без отдельного решения.
+- Не возвращать старую модель `Device/Tag` как центр продукта.
+- Не начинать C++, visual editors, real command execution или full microservices до соответствующих gates.
+- Каждый шаг должен завершаться обновлением `PROJECT_STATE.md`.
+- Каждый кодовый шаг должен собираться и иметь минимальные проверки.
+
+## Локальная разработка
+
+См. `docs/runbooks/local-development.md`.

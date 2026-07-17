@@ -1,194 +1,82 @@
-# Dispatcher Project State
+# PROJECT_STATE
 
 ## Product
+- Name: Диспетчер
+- Repository: dispatcherV4
+- Master specification: DISPATCHER_TECHNICAL_SPECIFICATION_AND_ROADMAP.md
+- AI guide: DISPATCHER_AI_IMPLEMENTATION_SPEC.md
+- Stack: .NET / ASP.NET Core / Blazor / PostgreSQL / SignalR / Worker Services
+- Target branch: master
 
-Product name: Диспетчер  
-Repository: dispatcherV4  
-Solution: Dispatcher.slnx  
-Root namespace: Dispatcher  
-Main branch: master  
+## Current phase
+- Phase: Preparation
+- Status: In progress
 
-## Technology Stack
+## Current sprint
+- Sprint: 1
+- Goal: Архитектурный baseline и рабочий репозиторий
 
-- Backend: ASP.NET Core / C#
-- Frontend: Blazor WebAssembly
-- Realtime: SignalR
-- Database: PostgreSQL, later TimescaleDB
-- ORM: Entity Framework Core
-- Workers: .NET Worker Service
-- Development OS: Windows
-- IDE: Visual Studio 2026
-- Target framework: .NET 10
+## Current step
+- Step: 0A
+- Name: Repository cleanup and baseline reset
+- Status: Pending commit
+- Started: 2026-07-18T00:00:00Z
+- Completed: null
 
-## Architecture Decisions
+## Completed steps
+| Step | Date UTC | Commit | Result | Notes |
+|---|---|---|---|---|
+| 0A | pending | pending | Repository cleanup baseline prepared | Старый тренировочный код удаляется обычным commit без переписывания Git history. |
 
-- MVP is implemented in C#.
-- C++ polling engine is postponed until performance measurements.
-- Frontend is Blazor WebAssembly.
-- Realtime updates use SignalR.
-- Devices are read-only in MVP.
-- Future SCADA control must be considered architecturally.
-- Email is the only notification channel in the first version.
-- Docker, backup, mobile version and audit log are postponed.
-- Work is done in the master branch.
-- Terminal commands are written as one command per line.
-- The solution uses the Visual Studio solution file format `Dispatcher.slnx`.
-- Application layer defines repository and service contracts.
-- Application service implementations coordinate domain objects through repository interfaces.
-- Infrastructure layer implements persistence contracts with EF Core and PostgreSQL provider.
-- EF Core migrations are generated into `Dispatcher.Infrastructure`.
-- PostgreSQL is not ready locally yet; database update can be postponed.
-- Mock polling worker is disabled by default until PostgreSQL and test tags are ready.
-- Blazor WebAssembly calls the API through configurable `ApiBaseUrl`.
-- API allows Blazor local development origins with a development CORS policy.
-- Blazor current tag values page uses SignalR for realtime updates.
-- Each assistant step starts with an estimate of remaining steps until the first MVP.
+## Architecture decisions
+| ADR | Decision | Status | Consequences |
+|---|---|---|---|
+| ADR-0001 | Industrial Dispatcher baseline starts from clean repository contents while preserving Git history | Accepted | Старый учебный код не переносится автоматически; product architecture follows master-ТЗ and AI guide. |
 
-## Current Solution Structure
+## Created projects
+| Project | Purpose | Created in step | Build status |
+|---|---|---|---|
+| none | Solution skeleton is not created yet | n/a | n/a |
 
-```text
-/src
- ├─ Dispatcher.Api
- ├─ Dispatcher.Web
- ├─ Dispatcher.Worker
- ├─ Dispatcher.Application
- ├─ Dispatcher.Domain
- ├─ Dispatcher.Infrastructure
- └─ Dispatcher.Shared
+## Database status
+- Provider: PostgreSQL
+- Connection method: not configured yet
+- Schemas created: none
+- Current migration: none
+- Clean install verified: No
+- Upgrade verified: No
 
-/docs
- └─ development
-```
+## Migrations
+| Migration | Step | Applied locally | Roll-forward tested | Notes |
+|---|---|---|---|---|
+| none | n/a | No | No | Database infrastructure starts in Step 4. |
 
-## Completed Steps
+## API endpoints
+| Method | Route | Authorization | Implemented in step | Tests |
+|---|---|---|---|---|
+| none | n/a | n/a | n/a | API solution starts in Step 1. |
 
-### Step 00 — Planning
+## Frontend routes
+| Route | Status | Authorization UX | Smoke test |
+|---|---|---|---|
+| none | Not implemented | n/a | No |
 
-Commit:
-- Not committed yet.
+## Workers
+| Worker/job | Host | Schedule/trigger | Health/metrics | Status |
+|---|---|---|---|---|
+| none | n/a | n/a | n/a | Worker hosts start in Step 1. |
 
-### Step 01 — Create solution structure
+## Known limitations
+- Repository contains documentation baseline only after Step 0A.
+- No .NET solution exists until Step 1.
+- No API, UI, database, workers or tests exist yet.
+- Existing Git history still contains earlier training prototype commits; this is intentional and not a production code dependency.
 
-Commit:
-- ffda784a074bb43a6930f16708950157923940dd
+## Next steps
+1. Step 0 — подготовка репозитория по `DISPATCHER_AI_IMPLEMENTATION_SPEC.md`.
+2. Step 1 — solution skeleton.
 
-### Step 02 — Add Domain base classes and enums
-
-Commit:
-- 71df25e4c2552af05a25f5619d53e23ff1ed0fc9
-
-### Step 03 — Add Device and Tag domain entities
-
-Commit:
-- 788ffa51f9fdad613ef75a82c4db9d71d1a4063c
-
-### Step 04 — Add Application contracts
-
-Commit:
-- 4c3876b75a0b7ab8dc83083df2bd457774db4dc9
-
-### Step 05 — Add Infrastructure EF Core persistence
-
-Commit:
-- dc9d8f050238494f06a240afa7db6dbf7743f8f2
-
-### Step 06 — Add Application service implementations
-
-Commit:
-- c81f217a0189b9ba5d0f07f0b4efe99475b24bce
-
-### Step 07 — Wire API and add device endpoints
-
-Commit:
-- 4af0e4d875c796c7569fb1f55f5ca55cc3dbb38f
-
-### Step 08 — Add EF Core migration tooling and create initial database migration
-
-Done:
-- Added migration tooling.
-- PostgreSQL database update was postponed because PostgreSQL is not ready locally yet.
-
-Commit:
-- 3d42910f282777bdaeadeef5467ec12490b9c328
-
-### Step 09 — Align EF Core package versions
-
-Commit:
-- ec88c0d17206d4b49a5b5241bd2b88a0c38e42f8
-
-### Step 10 — Add Tag API endpoints
-
-Commit:
-- 5e837f325984f1cfc7b5f5afae22e5c45ede1e41
-
-### Step 11 — Add current tag value API endpoints
-
-Commit:
-- ffdca97b4d069ffa1dd10ba0def432f934e4043d
-
-### Step 12 — Add mock polling worker
-
-Commit:
-- 8a700ff9dc9eca7cc5aba793bfe95b521e2c7e47
-
-### Step 13 — Add SignalR realtime API foundation
-
-Commit:
-- ff061137964ae183c870294ba88bf43538dbd4f5
-
-### Step 14 — Add Blazor WebAssembly UI foundation
-
-Commit:
-- 8f241dce0f24782a85ba570aafcf8b1c74b06403
-
-### Step 15 — Add Blazor devices UI
-
-Commit:
-- 9ae61aaa75bd0ecdea6ed4e3374ab376a8b16ec5
-
-### Step 16 — Add Blazor tags UI
-
-Done:
-- Added Blazor tag models.
-- Added tag API client methods.
-- Replaced the tags placeholder page with a working tag management page.
-- Added documentation for the tags page.
-- Built solution successfully.
-
-Commit:
-- 3e158aad1cd06c2fe24343b410335b0e6aea2f6d
-
-## Current Step
-
-Step 17 — Add Blazor current tag values and realtime page.
-
-## Next Steps
-
-1. Add Blazor SignalR client package reference.
-2. Add current tag value models.
-3. Add current tag value API methods to DispatcherApiClient.
-4. Add TagValueRealtimeClient.
-5. Add current tag values page.
-6. Add navigation and documentation.
-7. Build solution.
-8. Commit changes.
-
-## Backlog
-
-- PostgreSQL local setup and database update.
-- Enable mock polling against local database.
-- Modbus TCP polling.
-- SNMP polling.
-- Tag history.
-- Alarm entities.
-- Alarm rules.
-- Alarm journal.
-- Notification entities.
-- Email notifications.
-- User entity.
-- User roles.
-- Mnemoscheme page.
-- C++ polling engine evaluation.
-- Docker.
-- Backup.
-- Audit log.
+## Commit hash history
+| Date UTC | Step | Commit hash | Message |
+|---|---|---|---|
+| pending | 0A | pending | Reset repository for industrial Dispatcher baseline |

@@ -1,32 +1,42 @@
-# Build results
-[Bb]in/
-[Oo]bj/
+# Build outputs
+bin/
+obj/
+out/
+artifacts/
+TestResults/
+coverage/
 
-# Visual Studio
+# IDE
 .vs/
+.vscode/
+.idea/
 *.user
 *.suo
 *.userosscache
 *.sln.docstates
 
-# Rider
-.idea/
+# OS
+.DS_Store
+Thumbs.db
 
-# VS Code
-.vscode/
+# Local environment and secrets
+.env
+.env.*
+*.local.json
+appsettings.Local.json
+secrets.json
+*.pfx
+*.key
+*.pem
 
-# NuGet
-*.nupkg
-packages/
+# Incoming/backup working folders
+.incoming/
+.backup/
 
 # Logs
-*.log
 logs/
+*.log
 
-# Local settings
-appsettings.Development.local.json
-appsettings.Local.json
-.env
-
-# Incoming step archives
-.incoming/
+# Packages/cache
+packages/
+.nuget/
