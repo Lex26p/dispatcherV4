@@ -39,7 +39,7 @@ Main branch: master
 - Infrastructure layer implements persistence contracts with EF Core and PostgreSQL provider.
 - The default development connection string is temporary and will be moved to secure configuration later.
 - EF Core migrations are generated into `Dispatcher.Infrastructure`.
-- PostgreSQL is not required for compilation, but data endpoints require it at runtime.
+- PostgreSQL is not ready locally yet; database update can be postponed.
 - Each assistant step starts with an estimate of remaining steps until the first MVP.
 
 ## Current Solution Structure
@@ -176,8 +176,8 @@ Done:
 - Added EF Core design package references.
 - Added design-time DispatcherDbContext factory.
 - Kept HTTPS redirection disabled in Development to avoid local HTTP warning noise.
-- Added migration tooling and migration workflow.
-- PostgreSQL database update was intentionally skipped because PostgreSQL is not ready yet.
+- Added migration setup.
+- PostgreSQL database update was postponed because PostgreSQL is not ready locally yet.
 - Built solution successfully.
 
 Commit:
@@ -186,33 +186,44 @@ Commit:
 ### Step 09 — Align EF Core package versions
 
 Done:
-- Aligned Worker hosting package version with the rest of the .NET 10 package set.
-- Added explicit EF Core relational package alignment where needed.
-- Removed EF Core assembly conflict warning from Worker build path.
+- Aligned EF Core related package versions.
+- Aligned Worker hosting package version with the rest of the solution.
+- Removed MSB3277 assembly version conflict warning.
 - Built solution successfully.
 
 Commit:
 - ec88c0d17206d4b49a5b5241bd2b88a0c38e42f8
 
+### Step 10 — Add Tag API endpoints
+
+Done:
+- Added API contracts for creating Modbus tags.
+- Added API contracts for creating SNMP tags.
+- Added tag endpoints.
+- Registered tag endpoints in API startup.
+- Built solution successfully.
+
+Commit:
+- 5e837f325984f1cfc7b5f5afae22e5c45ede1e41
+
 ## Current Step
 
-Step 10 — Add Tag API endpoints.
+Step 11 — Add current tag value API endpoints.
 
 ## Next Steps
 
-1. Add API request contracts for creating Modbus and SNMP tags.
-2. Add tag endpoints.
-3. Map tag endpoints in Program.cs.
-4. Add development documentation for Tag API.
-5. Build solution.
-6. Commit changes.
+1. Add current tag value API contract.
+2. Add current tag value endpoints.
+3. Register current tag value endpoints in API startup.
+4. Build solution.
+5. Commit changes.
 
 ## Backlog
 
 - Alarm entities.
 - Notification entities.
 - User entity.
-- Current tag value API.
+- PostgreSQL local setup and database update.
 - Mock polling worker.
 - SignalR realtime updates.
 - Blazor device and tag pages.

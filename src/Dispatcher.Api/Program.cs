@@ -22,5 +22,6 @@ else
 app.MapHealthEndpoints();
 app.MapDeviceEndpoints();
 app.MapTagEndpoints();
+app.MapTagValueEndpoints();
 
 app.Run();

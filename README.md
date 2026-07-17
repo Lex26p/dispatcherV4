@@ -2,48 +2,26 @@
 
 Диспетчер — web-система мониторинга оборудования с аварийной сигнализацией.
 
-## MVP
+## Текущее состояние
 
-Первая версия системы предназначена для чтения данных с устройств по Modbus TCP и SNMP, отображения текущих значений, хранения истории, регистрации аварий и отправки Email-уведомлений.
+В проект добавлены базовые слои Domain, Application, Infrastructure и API.
 
-## Технологии
+На Step 11 добавлены endpoints текущих значений тегов:
 
-- ASP.NET Core / C#
-- Blazor WebAssembly
-- SignalR
-- .NET Worker Service
-- Entity Framework Core
-- PostgreSQL
-- TimescaleDB в будущем для истории временных рядов
+- `GET /api/tag-values/current`
+- `GET /api/tag-values/current/{tagId}`
+- `POST /api/tag-values/current`
+- `POST /api/tag-values/current/{tagId}`
+- `GET /api/tags/{tagId}/current-value`
+
+Эти endpoints нужны для будущего polling worker и SignalR realtime-обновлений.
+
+## Важно
+
+PostgreSQL может быть не установлен локально. В этом случае сборка и `/api/health` должны работать, но endpoints данных будут полноценно работать только после запуска PostgreSQL и применения EF Core миграции.
 
 ## Репозиторий
 
 Репозиторий: `dispatcherV4`  
 Solution: `Dispatcher.slnx`  
 Namespace: `Dispatcher`
-
-## Текущий API
-
-```text
-GET  /api/health
-GET  /api/devices
-GET  /api/devices/{id}
-POST /api/devices/modbus-tcp
-POST /api/devices/snmp
-POST /api/devices/{id}/enable
-POST /api/devices/{id}/disable
-
-GET  /api/tags/{id}
-GET  /api/devices/{deviceId}/tags
-POST /api/tags/modbus
-POST /api/tags/snmp
-POST /api/tags/{id}/enable
-POST /api/tags/{id}/disable
-```
-
-## Development docs
-
-```text
-docs/development/database.md
-docs/development/api-tags.md
-```
