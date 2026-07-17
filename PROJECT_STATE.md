@@ -4,7 +4,7 @@
 
 Product name: Диспетчер  
 Repository: dispatcherV4  
-Solution: Dispatcher.sln  
+Solution: Dispatcher.slnx  
 Root namespace: Dispatcher  
 Main branch: master  
 
@@ -32,6 +32,7 @@ Main branch: master
 - Docker, backup, mobile version and audit log are postponed.
 - Work is done in the master branch.
 - Terminal commands are written as one command per line.
+- The solution uses the Visual Studio solution file format `Dispatcher.slnx`.
 
 ## Current Solution Structure
 
@@ -53,7 +54,7 @@ Main branch: master
 Done:
 - Defined product name: Диспетчер.
 - Defined repository name: dispatcherV4.
-- Defined solution name: Dispatcher.sln.
+- Defined solution name: Dispatcher.slnx.
 - Defined namespace: Dispatcher.
 - Defined MVP stack.
 - Defined workflow with zip archives and PowerShell commands.
@@ -63,17 +64,30 @@ Done:
 Commit:
 - Not committed yet.
 
+### Step 01 — Create solution structure
+
+Done:
+- Created base solution structure.
+- Created projects: Api, Web, Worker, Domain, Application, Infrastructure, Shared.
+- Added project references.
+- Added project documentation and repository settings.
+- Added explicit Microsoft.OpenApi 2.7.5 package reference to avoid vulnerable transitive 2.0.0 package.
+- Built solution successfully.
+
+Commit:
+- ffda784a074bb43a6930f16708950157923940dd
+
 ## Current Step
 
-Step 01 — Create solution structure.
+Step 02 — Add Domain base classes and enums.
 
 ## Next Steps
 
-1. Create Dispatcher.sln.
-2. Create base projects.
-3. Add projects to solution.
-4. Add project references.
-5. Add project documentation files.
+1. Add common Domain base classes.
+2. Add base enums for devices.
+3. Add base enums for tags.
+4. Add base enums for alarms.
+5. Add base enums for notifications and users.
 6. Build solution.
 7. Commit changes.
 
