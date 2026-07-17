@@ -2,38 +2,23 @@
 
 Диспетчер — web-система мониторинга оборудования с аварийной сигнализацией.
 
-## MVP
+## Текущий статус
 
-Первая версия системы предназначена для чтения данных с устройств по Modbus TCP и SNMP, отображения текущих значений, хранения истории, регистрации аварий и отправки Email-уведомлений.
+В проекте создана базовая архитектура:
 
-## Технологии
+- Domain layer
+- Application contracts and services
+- Infrastructure persistence on EF Core
+- API wiring and device endpoints
+- EF Core migration tooling
 
-- ASP.NET Core / C#
-- Blazor WebAssembly
-- SignalR
-- .NET Worker Service
-- PostgreSQL
-- Entity Framework Core
-- TimescaleDB в будущем для истории временных рядов
+PostgreSQL пока не готов. Применение миграции к базе можно выполнить позже.
 
-## Репозиторий
+## Step 09
 
-Репозиторий: `dispatcherV4`  
+Шаг 09 выравнивает версии EF Core в `Dispatcher.Infrastructure` и `Dispatcher.Worker`, чтобы убрать предупреждение MSB3277 о конфликте `Microsoft.EntityFrameworkCore.Relational`.
+
+## Решение
+
 Solution: `Dispatcher.slnx`  
-Namespace: `Dispatcher`
-
-## Локальная база данных
-
-Для разработки используется PostgreSQL.
-
-Строка подключения по умолчанию:
-
-```text
-Host=localhost;Port=5432;Database=dispatcher;Username=postgres;Password=postgres
-```
-
-Инструкции по миграциям находятся в:
-
-```text
-docs/development/database.md
-```
+Main branch: `master`

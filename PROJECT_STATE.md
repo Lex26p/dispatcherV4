@@ -39,6 +39,8 @@ Main branch: master
 - Infrastructure layer implements persistence contracts with EF Core and PostgreSQL provider.
 - The default development connection string is temporary and will be moved to secure configuration later.
 - EF Core migrations are generated into `Dispatcher.Infrastructure`.
+- PostgreSQL is not ready yet; database update can be postponed while code and migrations are committed.
+- EF Core package versions are explicitly aligned to avoid mixed assembly version warnings between Worker and Infrastructure.
 - Each assistant step starts with an estimate of remaining steps until the first MVP.
 
 ## Current Solution Structure
@@ -168,23 +170,35 @@ Done:
 Commit:
 - 4af0e4d875c796c7569fb1f55f5ca55cc3dbb38f
 
+### Step 08 — Add EF Core migration tooling and create initial database migration
+
+Done:
+- Added local dotnet-ef tool manifest.
+- Added EF Core design-time factory.
+- Added EF Core design packages.
+- Disabled HTTPS redirection in Development.
+- Created initial migration setup.
+- PostgreSQL database update was postponed because PostgreSQL is not ready yet.
+- Built solution successfully with one EF Core Relational version warning in Worker.
+
+Commit:
+- 3d42910f282777bdaeadeef5467ec12490b9c328
+
 ## Current Step
 
-Step 08 — Add EF Core migration tooling and create initial database migration.
+Step 09 — Align EF Core package versions.
 
 ## Next Steps
 
-1. Add local dotnet-ef tool manifest.
-2. Add EF Core design package references.
-3. Add design-time DispatcherDbContext factory.
-4. Keep HTTPS redirection disabled in Development to avoid local HTTP warning noise.
-5. Generate InitialCreate migration.
-6. Optionally apply migration to local PostgreSQL.
-7. Build solution.
-8. Commit changes.
+1. Pin Microsoft.EntityFrameworkCore.Relational 10.0.10 explicitly where needed.
+2. Align Worker hosting package version with the rest of the solution.
+3. Restore packages.
+4. Build solution and verify the MSB3277 warning is gone.
+5. Commit changes.
 
 ## Backlog
 
+- PostgreSQL local installation and database update.
 - Alarm entities.
 - Notification entities.
 - User entity.
