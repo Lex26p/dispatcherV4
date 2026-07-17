@@ -12,8 +12,8 @@
 - Blazor WebAssembly
 - SignalR
 - .NET Worker Service
-- Entity Framework Core
 - PostgreSQL
+- Entity Framework Core
 - TimescaleDB в будущем для истории временных рядов
 
 ## Репозиторий
@@ -22,12 +22,19 @@
 Solution: `Dispatcher.slnx`  
 Namespace: `Dispatcher`
 
-## Worker
+## Текущее состояние
 
-`Dispatcher.Worker` содержит mock polling worker. Он отключен по умолчанию, потому что локальный PostgreSQL пока не готов.
+Реализованы:
 
-Документация:
+- базовая Domain-модель;
+- Application contracts;
+- Application services;
+- EF Core Infrastructure;
+- API endpoints для устройств;
+- API endpoints для тегов;
+- API endpoints для текущих значений тегов;
+- EF Core migration setup;
+- mock polling worker;
+- SignalR hub для realtime-обновлений текущих значений тегов.
 
-```text
-docs/development/mock-polling-worker.md
-```
+PostgreSQL пока может быть не готов локально. В этом случае database update и data endpoints можно проверить позже.

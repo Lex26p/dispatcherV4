@@ -26,7 +26,7 @@ Main branch: master
 - MVP is implemented in C#.
 - C++ polling engine is postponed until performance measurements.
 - Frontend is Blazor WebAssembly.
-- Realtime updates will use SignalR.
+- Realtime updates use SignalR.
 - Devices are read-only in MVP.
 - Future SCADA control must be considered architecturally.
 - Email is the only notification channel in the first version.
@@ -41,6 +41,7 @@ Main branch: master
 - EF Core migrations are generated into `Dispatcher.Infrastructure`.
 - PostgreSQL is not ready locally yet; database update can be postponed.
 - Mock polling worker is disabled by default until PostgreSQL and test tags are ready.
+- API exposes a SignalR hub for current tag value updates.
 - Each assistant step starts with an estimate of remaining steps until the first MVP.
 
 ## Current Solution Structure
@@ -218,19 +219,33 @@ Done:
 Commit:
 - ffdca97b4d069ffa1dd10ba0def432f934e4043d
 
+### Step 12 — Add mock polling worker
+
+Done:
+- Registered Application and Infrastructure services in Worker.
+- Added mock polling options.
+- Added mock polling background service.
+- Kept mock polling disabled by default until PostgreSQL is ready.
+- Added worker configuration and documentation.
+- Built solution successfully.
+
+Commit:
+- 8a700ff9dc9eca7cc5aba793bfe95b521e2c7e47
+
 ## Current Step
 
-Step 12 — Add mock polling worker.
+Step 13 — Add SignalR realtime API foundation.
 
 ## Next Steps
 
-1. Register Application and Infrastructure services in Worker.
-2. Add mock polling options.
-3. Add mock polling background service.
-4. Keep mock polling disabled by default until PostgreSQL is ready.
-5. Add worker configuration and documentation.
-6. Build solution.
-7. Commit changes.
+1. Add SignalR hub for current tag values.
+2. Add realtime constants.
+3. Add current tag value broadcaster abstraction and SignalR implementation.
+4. Add realtime metadata endpoint.
+5. Register SignalR and hub route in API startup.
+6. Broadcast current tag value changes made through API endpoints.
+7. Build solution.
+8. Commit changes.
 
 ## Backlog
 
@@ -238,7 +253,7 @@ Step 12 — Add mock polling worker.
 - Notification entities.
 - User entity.
 - PostgreSQL local setup and database update.
-- SignalR realtime updates.
+- Worker-to-API realtime integration.
 - Blazor device and tag pages.
 - Modbus TCP polling.
 - SNMP polling.

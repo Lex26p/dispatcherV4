@@ -1,4 +1,5 @@
 using Dispatcher.Api.Contracts.Tags;
+using Dispatcher.Api.Realtime;
 using Dispatcher.Application.Tags;
 
 namespace Dispatcher.Api.Endpoints;
@@ -32,9 +33,13 @@ public static class TagValueEndpoints
         group.MapPost("/current", async (
             UpsertTagValueRequest request,
             ITagValueService tagValueService,
+            ITagValueBroadcaster tagValueBroadcaster,
             CancellationToken cancellationToken) =>
         {
-            await tagValueService.UpsertCurrentValueAsync(request.ToDto(), cancellationToken);
+            var value = request.ToDto();
+            await tagValueService.UpsertCurrentValueAsync(value, cancellationToken);
+            await tagValueBroadcaster.BroadcastCurrentValueAsync(value, cancellationToken);
+
             return Results.NoContent();
         })
         .WithName("UpsertCurrentTagValue");
@@ -43,9 +48,13 @@ public static class TagValueEndpoints
             Guid tagId,
             UpsertTagValueRequest request,
             ITagValueService tagValueService,
+            ITagValueBroadcaster tagValueBroadcaster,
             CancellationToken cancellationToken) =>
         {
-            await tagValueService.UpsertCurrentValueAsync(request.ToDto(tagId), cancellationToken);
+            var value = request.ToDto(tagId);
+            await tagValueService.UpsertCurrentValueAsync(value, cancellationToken);
+            await tagValueBroadcaster.BroadcastCurrentValueAsync(value, cancellationToken);
+
             return Results.NoContent();
         })
         .WithName("UpsertCurrentTagValueByTagId");
