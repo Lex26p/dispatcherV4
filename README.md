@@ -12,6 +12,7 @@
 - Blazor WebAssembly
 - SignalR
 - .NET Worker Service
+- Entity Framework Core
 - PostgreSQL
 - TimescaleDB в будущем для истории временных рядов
 
@@ -28,3 +29,4 @@ Namespace: `Dispatcher`
 - Добавлена основа Domain-модели.
 - Добавлены сущности устройств, тегов и текущих значений.
 - Добавлены контракты Application layer для устройств, тегов и текущих значений.
+- Добавлен Infrastructure persistence layer на EF Core с PostgreSQL provider.

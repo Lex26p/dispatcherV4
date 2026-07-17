@@ -57,4 +57,13 @@ public sealed class TagValue : Entity
     {
         return new TagValue(tagId, deviceId, null, TagQuality.Bad, timestamp, errorMessage);
     }
+
+    public void Update(string? value, TagQuality quality, DateTimeOffset timestamp, string? errorMessage = null)
+    {
+        Value = value;
+        Quality = quality;
+        Timestamp = timestamp;
+        ErrorMessage = errorMessage;
+        MarkUpdated();
+    }
 }
