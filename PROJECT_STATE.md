@@ -39,8 +39,7 @@ Main branch: master
 - Infrastructure layer implements persistence contracts with EF Core and PostgreSQL provider.
 - The default development connection string is temporary and will be moved to secure configuration later.
 - EF Core migrations are generated into `Dispatcher.Infrastructure`.
-- PostgreSQL is not ready yet; database update can be postponed while code and migrations are committed.
-- EF Core package versions are explicitly aligned to avoid mixed assembly version warnings between Worker and Infrastructure.
+- PostgreSQL is not required for compilation, but data endpoints require it at runtime.
 - Each assistant step starts with an estimate of remaining steps until the first MVP.
 
 ## Current Solution Structure
@@ -174,35 +173,45 @@ Commit:
 
 Done:
 - Added local dotnet-ef tool manifest.
-- Added EF Core design-time factory.
-- Added EF Core design packages.
-- Disabled HTTPS redirection in Development.
-- Created initial migration setup.
-- PostgreSQL database update was postponed because PostgreSQL is not ready yet.
-- Built solution successfully with one EF Core Relational version warning in Worker.
+- Added EF Core design package references.
+- Added design-time DispatcherDbContext factory.
+- Kept HTTPS redirection disabled in Development to avoid local HTTP warning noise.
+- Added migration tooling and migration workflow.
+- PostgreSQL database update was intentionally skipped because PostgreSQL is not ready yet.
+- Built solution successfully.
 
 Commit:
 - 3d42910f282777bdaeadeef5467ec12490b9c328
 
+### Step 09 — Align EF Core package versions
+
+Done:
+- Aligned Worker hosting package version with the rest of the .NET 10 package set.
+- Added explicit EF Core relational package alignment where needed.
+- Removed EF Core assembly conflict warning from Worker build path.
+- Built solution successfully.
+
+Commit:
+- ec88c0d17206d4b49a5b5241bd2b88a0c38e42f8
+
 ## Current Step
 
-Step 09 — Align EF Core package versions.
+Step 10 — Add Tag API endpoints.
 
 ## Next Steps
 
-1. Pin Microsoft.EntityFrameworkCore.Relational 10.0.10 explicitly where needed.
-2. Align Worker hosting package version with the rest of the solution.
-3. Restore packages.
-4. Build solution and verify the MSB3277 warning is gone.
-5. Commit changes.
+1. Add API request contracts for creating Modbus and SNMP tags.
+2. Add tag endpoints.
+3. Map tag endpoints in Program.cs.
+4. Add development documentation for Tag API.
+5. Build solution.
+6. Commit changes.
 
 ## Backlog
 
-- PostgreSQL local installation and database update.
 - Alarm entities.
 - Notification entities.
 - User entity.
-- Tag CRUD API.
 - Current tag value API.
 - Mock polling worker.
 - SignalR realtime updates.

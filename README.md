@@ -2,23 +2,48 @@
 
 Диспетчер — web-система мониторинга оборудования с аварийной сигнализацией.
 
-## Текущий статус
+## MVP
 
-В проекте создана базовая архитектура:
+Первая версия системы предназначена для чтения данных с устройств по Modbus TCP и SNMP, отображения текущих значений, хранения истории, регистрации аварий и отправки Email-уведомлений.
 
-- Domain layer
-- Application contracts and services
-- Infrastructure persistence on EF Core
-- API wiring and device endpoints
-- EF Core migration tooling
+## Технологии
 
-PostgreSQL пока не готов. Применение миграции к базе можно выполнить позже.
+- ASP.NET Core / C#
+- Blazor WebAssembly
+- SignalR
+- .NET Worker Service
+- Entity Framework Core
+- PostgreSQL
+- TimescaleDB в будущем для истории временных рядов
 
-## Step 09
+## Репозиторий
 
-Шаг 09 выравнивает версии EF Core в `Dispatcher.Infrastructure` и `Dispatcher.Worker`, чтобы убрать предупреждение MSB3277 о конфликте `Microsoft.EntityFrameworkCore.Relational`.
-
-## Решение
-
+Репозиторий: `dispatcherV4`  
 Solution: `Dispatcher.slnx`  
-Main branch: `master`
+Namespace: `Dispatcher`
+
+## Текущий API
+
+```text
+GET  /api/health
+GET  /api/devices
+GET  /api/devices/{id}
+POST /api/devices/modbus-tcp
+POST /api/devices/snmp
+POST /api/devices/{id}/enable
+POST /api/devices/{id}/disable
+
+GET  /api/tags/{id}
+GET  /api/devices/{deviceId}/tags
+POST /api/tags/modbus
+POST /api/tags/snmp
+POST /api/tags/{id}/enable
+POST /api/tags/{id}/disable
+```
+
+## Development docs
+
+```text
+docs/development/database.md
+docs/development/api-tags.md
+```
