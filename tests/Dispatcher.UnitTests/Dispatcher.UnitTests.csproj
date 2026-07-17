@@ -2,13 +2,15 @@
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="xunit" />
     <PackageReference Include="xunit.runner.visualstudio" PrivateAssets="all" />
-    <PackageReference Include="coverlet.collector" PrivateAssets="all" />
-    <ProjectReference Include="..\..\src\Dispatcher.Domain\Dispatcher.Domain.csproj" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\src\Dispatcher.Contracts\Dispatcher.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\Dispatcher.Domain\Dispatcher.Domain.csproj" />
   </ItemGroup>
 </Project>

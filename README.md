@@ -1,60 +1,60 @@
 # Диспетчер
 
-Промышленная web-платформа диспетчеризации, событий, аварий, инцидентов и эксплуатации распределенных объектов.
+Промышленная платформа диспетчеризации, эксплуатации, событий, инцидентов и ТОиР.
 
-## Документы-источники
+## Текущий статус
 
-- `DISPATCHER_TECHNICAL_SPECIFICATION_AND_ROADMAP.md` — master-ТЗ и дорожная карта.
-- `DISPATCHER_AI_IMPLEMENTATION_SPEC.md` — execution guide для пошаговой разработки ИИ-агентом.
-- `PROJECT_STATE.md` — текущее состояние репозитория.
+Репозиторий очищен от учебного кода и переведен на промышленный baseline.
 
-## Стек первого промышленного релиза
+Текущий шаг: **Step 2 — shared contracts and API correlation**.
 
-- C# / .NET
-- ASP.NET Core
-- Blazor
-- PostgreSQL
-- SignalR
-- .NET Worker Services
+## Источники истины
 
-## Текущее состояние
+- `DISPATCHER_TECHNICAL_SPECIFICATION_AND_ROADMAP.md` — master-ТЗ и roadmap.
+- `DISPATCHER_AI_IMPLEMENTATION_SPEC.md` — AI-focused execution guide.
+- `PROJECT_STATE.md` — текущее состояние репозитория и следующий шаг.
 
-Step 1 создает минимальный solution skeleton.
+## Текущий состав solution
 
-## Быстрая проверка
+- `Dispatcher.Api`
+- `Dispatcher.Web`
+- `Dispatcher.Domain`
+- `Dispatcher.Application`
+- `Dispatcher.Infrastructure`
+- `Dispatcher.Contracts`
+- `Dispatcher.Telemetry.Worker`
+- `Dispatcher.Workers`
+- `Dispatcher.UnitTests`
+- `Dispatcher.IntegrationTests`
+
+## Проверка
 
 ```powershell
 cd C:\Projects\dispatcherV4
-```
-
-```powershell
 dotnet restore .\Dispatcher.sln
-```
-
-```powershell
 dotnet build .\Dispatcher.sln --no-restore
-```
-
-```powershell
 dotnet test .\Dispatcher.sln --no-build
 ```
 
-## Запуск API
+## API smoke
 
 ```powershell
+cd C:\Projects\dispatcherV4
 dotnet run --project .\src\Dispatcher.Api\Dispatcher.Api.csproj
 ```
 
-Проверка:
+Проверить в другом окне:
 
 ```powershell
-Invoke-RestMethod http://localhost:5076/api/health/live
+Invoke-WebRequest http://localhost:5076/api/health/live | Select-Object StatusCode,Headers
+Invoke-WebRequest -Headers @{ 'X-Correlation-ID' = 'manual-step-02' } http://localhost:5076/api/health/ready | Select-Object StatusCode,Headers
 ```
 
-## Запуск Web
+## Важные правила
 
-```powershell
-dotnet run --project .\src\Dispatcher.Web\Dispatcher.Web.csproj
-```
-
-Открыть `/home` по URL, который покажет `dotnet run`.
+- Не начинать C++ до production/load-test metrics.
+- Не создавать все будущие проекты solution заранее.
+- Не смешивать EventRecord, AlarmOccurrence и Incident.
+- Не читать draft в runtime.
+- Не считать hidden UI backend authorization.
+- После каждого шага обновлять `PROJECT_STATE.md`.
