@@ -16,8 +16,8 @@
 - Goal: Locations and baseline asset model
 
 ## Current step
-- Step: 7A
-- Name: Locations domain and persistence
+- Step: 7C
+- Name: Locations Web UI
 - Status: Ready for local verification
 - Started: 2026-07-18T00:00:00Z
 - Completed: pending local verification and commit
@@ -45,6 +45,7 @@
 | Step 5 | Use development header current user until production auth provider is selected | Accepted | Backend permission checks exist now, but production authentication remains a known limitation |
 | Step 6 | Build a componentized Blazor shell before feature-heavy UI | Accepted | Shell uses AppShell, GlobalHeader, NavigationRail, ContextDrawerHost and RouteCatalog; no monolithic app.js copy |
 | Step 7A | Split Locations into smaller backend-first substeps | Accepted | Location domain and persistence are implemented before API and UI to reduce change size |
+| Step 7C | Keep Locations Web UI small and API-backed | Accepted | Web UI consumes REST API; no new domain or persistence changes in this step |
 
 ## Created projects
 | Project | Purpose | Created in step | Build status |
@@ -64,7 +65,7 @@
 - Provider: PostgreSQL 17 locally; EF Core via `Npgsql.EntityFrameworkCore.PostgreSQL`
 - Connection method: `ConnectionStrings:DispatcherDatabase` or `DISPATCHER_CONNECTION_STRING`
 - Schemas created: `identity_access`, `assets` after Step 7A migration
-- Current migration: `20260718002000_AddLocationsBaseline` after Step 7A migration
+- Current migration: `20260718002000_AddLocationsBaseline`
 - Clean install verified: baseline migration applied locally on 2026-07-18
 - Upgrade verified: Step 5 migration applied locally on 2026-07-18
 
@@ -73,7 +74,7 @@
 |---|---|---|---|---|
 | 20260718000000_BaselineDatabase | 4 | yes | yes | Empty EF Core baseline; creates EF migrations history when applied |
 | 20260718001000_AddIdentityAccessBaseline | 5 | yes | yes | Creates identity schema, users, roles, scopes, role assignments and development admin seed |
-| 20260718002000_AddLocationsBaseline | 7A | pending | pending | Creates `assets.locations`; no API/UI yet |
+| 20260718002000_AddLocationsBaseline | 7A | yes | yes | Creates `assets.locations`; API added in 7B; Web UI added in 7C |
 
 ## API endpoints
 | Method | Route | Authorization | Implemented in step | Tests |
@@ -88,6 +89,12 @@
 | GET | `/api/roles` | `identity.roles.view` | 5 | Manual smoke passed before Step 5 commit |
 | GET | `/api/permission-scopes` | `identity.scopes.view` | 5 | Manual smoke passed before Step 5 commit |
 | GET | `/api/role-assignments` | `identity.assignments.view` | 5 | Manual smoke passed before Step 5 commit |
+| GET | `/api/locations` | `locations.view` | 7B | Manual smoke passed before Step 7B commit |
+| GET | `/api/locations/{id}` | `locations.view` | 7B | Manual smoke passed before Step 7B commit |
+| POST | `/api/locations` | `locations.manage` | 7B | Manual smoke passed before Step 7B commit |
+| PUT | `/api/locations/{id}` | `locations.manage` | 7B | Manual smoke passed before Step 7B commit |
+| POST | `/api/locations/{id}/move` | `locations.manage` | 7B | Manual smoke pending |
+| POST | `/api/locations/{id}/archive` | `locations.manage` | 7B | Manual smoke pending |
 | POST | `/api/role-assignments` | `identity.assignments.manage` | 5 | Manual smoke pending |
 | POST | `/api/role-assignments/{id}/revoke` | `identity.assignments.manage` | 5 | Manual smoke pending; last-admin guard included |
 
@@ -103,6 +110,7 @@
 | `/settings` | Shell baseline route | Personal settings placeholder | Manual browser smoke required |
 | `/settings/profile` | Shell baseline route | Profile settings placeholder | Manual browser smoke required |
 | `/admin` | Shell baseline route | Admin landing page | Manual browser smoke required |
+| `/locations` | Locations Web UI | Backend authorization remains source of truth | Manual browser smoke pending |
 
 ## Workers
 | Worker/job | Host | Schedule/trigger | Health/metrics | Status |
@@ -130,12 +138,12 @@
 - Authentication is development-header based only; production provider is not selected yet.
 - Permission-aware navigation is represented by route catalog markers, but actual menu filtering from `/api/me` is deferred.
 - Audit hooks are documented but not persisted until the audit step.
-- No public assets API yet; Step 7A only adds Location domain and persistence.
 - No real telemetry, SignalR, dashboards, alarms or maintenance yet.
 - Step 2 diagnostics exception endpoint is development-only and must not become a business API.
 
 ## Next steps
-1. Step 7B — Locations API.
+1. Step 7C — Locations Web UI.
+2. Step 8A — Equipment domain and persistence.
 
 ## Commit hash history
 | Date UTC | Step | Commit hash | Message |
@@ -148,6 +156,8 @@
 | 2026-07-18 | 4 | 714cece5c877f3636e5c28af7dc3c6cc991cc01a | Fix Step 4 baseline migration build |
 | 2026-07-18 | 5 | 0bace21353276794050139abd6f2b423e49c5f5a | Step 5: Add Identity/RBAC baseline |
 | 2026-07-18 | 6 | c65226779cce0f4eb71d81064fd2e70bd38bcb7d | Step 6: Add Web shell baseline |
+| 2026-07-18 | 7A | 86aad3e8386c783646064624f82519b1b5e43611 | Step 7A: Add Locations domain and persistence |
+| 2026-07-18 | 7B | 2856caead2cda37b723c018e2b88242622063377 | Step 7B: Add Locations API |
 
 ## Step 7A local verification notes
 - This is an intentionally smaller substep.
@@ -161,3 +171,10 @@
 - Adds contracts, application service, repository boundary, EF repository, REST endpoints and permissions for Locations.
 - Web UI is deferred.
 
+
+## Step 7C — Locations Web UI
+
+- Status: In progress until local build/test/browser smoke/commit.
+- Previous step hash: 2856caead2cda37b723c018e2b88242622063377.
+- Adds API-backed Blazor `/locations` page and development localhost CORS.
+- No new migration or domain changes.

@@ -18,6 +18,7 @@ public static class RouteCatalog
         new("/home", "Рабочий стол", "Дом", "Оператор", PermissionNotRequired, true, 10),
         new("/me", "Мой профиль", "Я", "Пользователь", "identity.me.view", true, 20),
         new("/settings", "Настройки", "Настр", "Пользователь", PermissionNotRequired, true, 30),
+        new("/locations", "Локации", "Лок", "Объекты", "locations.view", true, 40),
         new("/admin", "Администрирование", "Адм", "Админ", "identity.users.view", true, 80),
         new("/admin/users", "Пользователи", "Польз", "Админ", "identity.users.view", false, 90),
         new("/forbidden", "Нет доступа", "403", "Система", PermissionNotRequired, false, 900),

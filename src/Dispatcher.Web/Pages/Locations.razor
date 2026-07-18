@@ -1,0 +1,303 @@
+@page "/locations"
+@inject DispatcherApiClient Api
+
+<PageTitle>Диспетчер · Локации</PageTitle>
+
+<section class="workspace-page locations-page">
+    <div class="page-heading split-heading">
+        <div>
+            <p class="eyebrow">Asset Model</p>
+            <h1>Локации</h1>
+            <p>Первый пользовательский экран над persisted asset model. Локации пока работают как простая иерархия: список, создание корневой/дочерней локации, переименование и архивирование.</p>
+        </div>
+        <div class="page-actions">
+            <button type="button" class="secondary-button" @onclick="ReloadAsync" disabled="@isBusy">Обновить</button>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(errorMessage))
+    {
+        <section class="alert-panel danger" role="alert">
+            <strong>Ошибка</strong>
+            <span>@errorMessage</span>
+        </section>
+    }
+
+    <section class="content-panel">
+        <div class="panel-heading-row">
+            <div>
+                <h2>Создать локацию</h2>
+                <p>Код должен быть стабильным машинным идентификатором, например <code>SITE-001</code> или <code>BLDG-A</code>.</p>
+            </div>
+        </div>
+
+        <div class="form-grid">
+            <label>
+                <span>Код</span>
+                <input @bind="newCode" placeholder="SITE-001" />
+            </label>
+            <label>
+                <span>Название</span>
+                <input @bind="newName" placeholder="Главная площадка" />
+            </label>
+            <label>
+                <span>Родитель</span>
+                <select @bind="newParentIdText">
+                    <option value="">Корневая локация</option>
+                    @foreach (var location in ActiveLocations)
+                    {
+                        <option value="@location.Id">@location.Code · @location.Name</option>
+                    }
+                </select>
+            </label>
+            <label class="wide-field">
+                <span>Описание</span>
+                <input @bind="newDescription" placeholder="Необязательно" />
+            </label>
+        </div>
+
+        <button type="button" class="primary-button" @onclick="CreateAsync" disabled="@isBusy">Создать</button>
+    </section>
+
+    <section class="content-panel">
+        <div class="panel-heading-row">
+            <div>
+                <h2>Список локаций</h2>
+                <p>@StatusText</p>
+            </div>
+            <label class="inline-toggle">
+                <input type="checkbox" @bind="includeArchived" @bind:after="ReloadAsync" />
+                <span>Показывать архив</span>
+            </label>
+        </div>
+
+        @if (isLoading)
+        {
+            <div class="empty-state compact-empty">
+                <h2>Загрузка</h2>
+                <p>Читаю локации из API.</p>
+            </div>
+        }
+        else if (locations.Count == 0)
+        {
+            <div class="empty-state compact-empty">
+                <h2>Локаций пока нет</h2>
+                <p>Создай первую корневую локацию, чтобы начать asset hierarchy.</p>
+            </div>
+        }
+        else
+        {
+            <div class="location-list">
+                @foreach (var location in OrderedLocations)
+                {
+                    <article class="location-row @(location.IsArchived ? "archived" : string.Empty)">
+                        <div>
+                            <strong>@location.Name</strong>
+                            <span>@location.Code</span>
+                            <small>@ParentLabel(location)</small>
+                        </div>
+                        <div class="location-meta">
+                            <span>@(location.IsArchived ? "Архив" : "Активна")</span>
+                            <small>@location.UpdatedAtUtc.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</small>
+                        </div>
+                        <div class="location-actions">
+                            <button type="button" class="secondary-button" @onclick="() => BeginEdit(location)" disabled="@isBusy">Изменить</button>
+                            @if (!location.IsArchived)
+                            {
+                                <button type="button" class="danger-button" @onclick="() => ArchiveAsync(location.Id)" disabled="@isBusy">В архив</button>
+                            }
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+    </section>
+
+    @if (editing is not null)
+    {
+        <section class="content-panel edit-panel">
+            <h2>Редактирование</h2>
+            <p><code>@editing.Code</code></p>
+            <div class="form-grid">
+                <label>
+                    <span>Название</span>
+                    <input @bind="editName" />
+                </label>
+                <label class="wide-field">
+                    <span>Описание</span>
+                    <input @bind="editDescription" />
+                </label>
+            </div>
+            <div class="button-row">
+                <button type="button" class="primary-button" @onclick="SaveEditAsync" disabled="@isBusy">Сохранить</button>
+                <button type="button" class="secondary-button" @onclick="CancelEdit" disabled="@isBusy">Отмена</button>
+            </div>
+        </section>
+    }
+</section>
+
+@code {
+    private List<LocationDto> locations = [];
+    private LocationDto? editing;
+    private string? errorMessage;
+    private bool isLoading = true;
+    private bool isBusy;
+    private bool includeArchived;
+
+    private string newCode = string.Empty;
+    private string newName = string.Empty;
+    private string? newDescription;
+    private string newParentIdText = string.Empty;
+
+    private string editName = string.Empty;
+    private string? editDescription;
+
+    private IEnumerable<LocationDto> ActiveLocations => locations
+        .Where(location => !location.IsArchived)
+        .OrderBy(location => location.Code, StringComparer.OrdinalIgnoreCase);
+
+    private IEnumerable<LocationDto> OrderedLocations => locations
+        .OrderBy(location => location.ParentLocationId.HasValue)
+        .ThenBy(location => location.Code, StringComparer.OrdinalIgnoreCase);
+
+    private string StatusText => locations.Count == 0
+        ? "Нет данных."
+        : $"Всего: {locations.Count}; активных: {locations.Count(location => !location.IsArchived)}.";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ReloadAsync();
+    }
+
+    private async Task ReloadAsync()
+    {
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            locations = (await Api.GetLocationsAsync(includeArchived)).ToList();
+        }
+        catch (Exception exception)
+        {
+            errorMessage = ToUserMessage(exception);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task CreateAsync()
+    {
+        if (string.IsNullOrWhiteSpace(newCode) || string.IsNullOrWhiteSpace(newName))
+        {
+            errorMessage = "Код и название обязательны.";
+            return;
+        }
+
+        await RunBusyAsync(async () =>
+        {
+            var parentId = string.IsNullOrWhiteSpace(newParentIdText)
+                ? (Guid?)null
+                : Guid.Parse(newParentIdText);
+
+            await Api.CreateLocationAsync(new CreateLocationRequest(parentId, newCode.Trim(), newName.Trim(), BlankToNull(newDescription)));
+            newCode = string.Empty;
+            newName = string.Empty;
+            newDescription = null;
+            newParentIdText = string.Empty;
+            await ReloadAsync();
+        });
+    }
+
+    private void BeginEdit(LocationDto location)
+    {
+        editing = location;
+        editName = location.Name;
+        editDescription = location.Description;
+        errorMessage = null;
+    }
+
+    private void CancelEdit()
+    {
+        editing = null;
+        errorMessage = null;
+    }
+
+    private async Task SaveEditAsync()
+    {
+        if (editing is null)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(editName))
+        {
+            errorMessage = "Название обязательно.";
+            return;
+        }
+
+        var id = editing.Id;
+        await RunBusyAsync(async () =>
+        {
+            await Api.UpdateLocationAsync(id, new UpdateLocationRequest(editName.Trim(), BlankToNull(editDescription)));
+            editing = null;
+            await ReloadAsync();
+        });
+    }
+
+    private async Task ArchiveAsync(Guid id)
+    {
+        await RunBusyAsync(async () =>
+        {
+            await Api.ArchiveLocationAsync(id, new ArchiveLocationRequest("Archived from Step 7C web UI."));
+            await ReloadAsync();
+        });
+    }
+
+    private async Task RunBusyAsync(Func<Task> operation)
+    {
+        isBusy = true;
+        errorMessage = null;
+
+        try
+        {
+            await operation();
+        }
+        catch (Exception exception)
+        {
+            errorMessage = ToUserMessage(exception);
+        }
+        finally
+        {
+            isBusy = false;
+        }
+    }
+
+    private string ParentLabel(LocationDto location)
+    {
+        if (!location.ParentLocationId.HasValue)
+        {
+            return "Корневая локация";
+        }
+
+        var parent = locations.FirstOrDefault(item => item.Id == location.ParentLocationId.Value);
+        return parent is null ? "Родитель недоступен" : $"Родитель: {parent.Code}";
+    }
+
+    private static string? BlankToNull(string? value)
+    {
+        return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+    }
+
+    private static string ToUserMessage(Exception exception)
+    {
+        return exception switch
+        {
+            DispatcherApiException apiException => $"API вернул {(int)apiException.StatusCode}: {apiException.ResponseBody}",
+            HttpRequestException => "API недоступен. Запусти Dispatcher.Api на http://localhost:5076.",
+            _ => exception.Message
+        };
+    }
+}

@@ -15,11 +15,31 @@ builder.Services.AddDispatcherInfrastructure(dispatcherDatabaseConnectionString)
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, HttpHeaderCurrentUser>();
 builder.Services.AddHealthChecks();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("DevelopmentLocalhost", policy =>
+    {
+        policy
+            .SetIsOriginAllowed(origin =>
+            {
+                return Uri.TryCreate(origin, UriKind.Absolute, out var uri)
+                    && (string.Equals(uri.Host, "localhost", StringComparison.OrdinalIgnoreCase)
+                        || string.Equals(uri.Host, "127.0.0.1", StringComparison.OrdinalIgnoreCase));
+            })
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 
 var app = builder.Build();
 
 app.UseMiddleware<CorrelationMiddleware>();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseCors("DevelopmentLocalhost");
+}
 
 app.MapGet("/", () => Results.Redirect("/api/health/live"));
 app.MapHealthEndpoints();
