@@ -43,3 +43,15 @@ dotnet tool run dotnet-ef database update --project .\src\Dispatcher.Infrastruct
 ## Current implementation status
 
 - Step 7B: Locations API/application layer added. Web UI for Locations is deferred to Step 7C.
+
+
+## Current implementation step
+
+Current small-step flow:
+
+- Step 7A — Locations domain and persistence: completed
+- Step 7B — Locations API: completed
+- Step 7C — Locations Web UI: completed
+- Step 8A — Equipment domain and persistence: ready for local verification
+
+Equipment is intentionally protocol-neutral. Modbus/SNMP/OPC UA/BACnet details must be introduced later through TelemetrySource, DataPoint and protocol mappings, not through the Equipment entity.

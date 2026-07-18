@@ -16,6 +16,8 @@ public sealed class DispatcherDbContext(DbContextOptions<DispatcherDbContext> op
 
     public DbSet<Location> Locations => Set<Location>();
 
+    public DbSet<Equipment> Equipment => Set<Equipment>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema(SchemaNames.Public);

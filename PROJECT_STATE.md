@@ -16,8 +16,8 @@
 - Goal: Locations and baseline asset model
 
 ## Current step
-- Step: 7C
-- Name: Locations Web UI
+- Step: 8A
+- Name: Equipment domain and persistence
 - Status: Ready for local verification
 - Started: 2026-07-18T00:00:00Z
 - Completed: pending local verification and commit
@@ -46,15 +46,16 @@
 | Step 6 | Build a componentized Blazor shell before feature-heavy UI | Accepted | Shell uses AppShell, GlobalHeader, NavigationRail, ContextDrawerHost and RouteCatalog; no monolithic app.js copy |
 | Step 7A | Split Locations into smaller backend-first substeps | Accepted | Location domain and persistence are implemented before API and UI to reduce change size |
 | Step 7C | Keep Locations Web UI small and API-backed | Accepted | Web UI consumes REST API; no new domain or persistence changes in this step |
+| Step 8A | Split Equipment into domain/persistence before API and UI | Accepted | Equipment stays protocol-neutral; TelemetrySource/DataPoint will handle protocol details later |
 
 ## Created projects
 | Project | Purpose | Created in step | Build status |
 |---|---|---|---|
 | Dispatcher.Api | ASP.NET Core API composition root, health endpoints, correlation, exception middleware and identity endpoints | 1, 2, 4, 5 | To verify locally |
 | Dispatcher.Web | Blazor WebAssembly shell baseline, route catalog, navigation rail, header, context drawer and baseline identity/admin/settings routes | 1, 5, 6 | To verify locally |
-| Dispatcher.Domain | Domain primitives, identity access entities and Location domain entity | 1, 3, 5, 7A | To verify locally |
+| Dispatcher.Domain | Domain primitives, identity access entities, Location and Equipment domain entities | 1, 3, 5, 7A, 8A | To verify locally |
 | Dispatcher.Application | Application abstractions, current user placeholder, correlation context, permission constants and DI registration | 1, 2, 5 | To verify locally |
-| Dispatcher.Infrastructure | Infrastructure adapters baseline, system clock, EF Core PostgreSQL DbContext, identity mappings and Location persistence | 1, 4, 5, 7A | To verify locally |
+| Dispatcher.Infrastructure | Infrastructure adapters baseline, system clock, EF Core PostgreSQL DbContext, identity mappings, Location and Equipment persistence | 1, 4, 5, 7A, 8A | To verify locally |
 | Dispatcher.Contracts | Public REST/SignalR contracts, problem details, paging, correlation, readiness and identity contracts | 1, 2, 4, 5 | To verify locally |
 | Dispatcher.Telemetry.Worker | Future telemetry runtime host skeleton | 1 | To verify locally |
 | Dispatcher.Workers | Future background jobs host skeleton | 1 | To verify locally |
@@ -65,7 +66,7 @@
 - Provider: PostgreSQL 17 locally; EF Core via `Npgsql.EntityFrameworkCore.PostgreSQL`
 - Connection method: `ConnectionStrings:DispatcherDatabase` or `DISPATCHER_CONNECTION_STRING`
 - Schemas created: `identity_access`, `assets` after Step 7A migration
-- Current migration: `20260718002000_AddLocationsBaseline`
+- Current migration: `20260718003000_AddEquipmentBaseline`
 - Clean install verified: baseline migration applied locally on 2026-07-18
 - Upgrade verified: Step 5 migration applied locally on 2026-07-18
 
@@ -75,6 +76,7 @@
 | 20260718000000_BaselineDatabase | 4 | yes | yes | Empty EF Core baseline; creates EF migrations history when applied |
 | 20260718001000_AddIdentityAccessBaseline | 5 | yes | yes | Creates identity schema, users, roles, scopes, role assignments and development admin seed |
 | 20260718002000_AddLocationsBaseline | 7A | yes | yes | Creates `assets.locations`; API added in 7B; Web UI added in 7C |
+| 20260718003000_AddEquipmentBaseline | 8A | pending | pending | Creates `assets.equipment`; API and Web UI deferred to 8B/8C |
 
 ## API endpoints
 | Method | Route | Authorization | Implemented in step | Tests |
@@ -133,6 +135,7 @@
 | PermissionScope | Dispatcher.Domain.IdentityAccess | Scope boundary for assignments | 5 |
 | RoleAssignment | Dispatcher.Domain.IdentityAccess | Grant/revoke lifecycle with reason and last-admin guard at API layer | 5 |
 | Location | Dispatcher.Domain.Assets | Physical/organizational hierarchy node with parent, code, name, archive state and timestamps | 7A |
+| Equipment | Dispatcher.Domain.Assets | Canonical equipment/asset registry entity linked to Location; intentionally no protocol fields | 8A |
 
 ## Known limitations
 - Authentication is development-header based only; production provider is not selected yet.
@@ -142,8 +145,9 @@
 - Step 2 diagnostics exception endpoint is development-only and must not become a business API.
 
 ## Next steps
-1. Step 7C — Locations Web UI.
-2. Step 8A — Equipment domain and persistence.
+1. Step 8A — Equipment domain and persistence.
+2. Step 8B — Equipment API.
+3. Step 8C — Equipment Web UI.
 
 ## Commit hash history
 | Date UTC | Step | Commit hash | Message |
@@ -174,7 +178,15 @@
 
 ## Step 7C — Locations Web UI
 
-- Status: In progress until local build/test/browser smoke/commit.
-- Previous step hash: 2856caead2cda37b723c018e2b88242622063377.
+- Status: Completed.
+- Commit: b4a4c6db086bb664024bde33238184f27ee59603.
 - Adds API-backed Blazor `/locations` page and development localhost CORS.
 - No new migration or domain changes.
+
+## Step 8A — Equipment domain and persistence
+
+- Status: In progress until local build/test/migration/commit.
+- Previous step hash: b4a4c6db086bb664024bde33238184f27ee59603.
+- Adds canonical `Equipment` domain entity and `assets.equipment` persistence.
+- Equipment API and Web UI are deferred to Step 8B and Step 8C.
+- Protocol configuration remains out of Equipment.
