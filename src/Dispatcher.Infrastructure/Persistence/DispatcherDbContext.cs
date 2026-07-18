@@ -1,5 +1,6 @@
 using Dispatcher.Domain.Assets;
 using Dispatcher.Domain.IdentityAccess;
+using Dispatcher.Domain.Telemetry;
 using Microsoft.EntityFrameworkCore;
 
 namespace Dispatcher.Infrastructure.Persistence;
@@ -17,6 +18,12 @@ public sealed class DispatcherDbContext(DbContextOptions<DispatcherDbContext> op
     public DbSet<Location> Locations => Set<Location>();
 
     public DbSet<Equipment> Equipment => Set<Equipment>();
+
+    public DbSet<DataPoint> DataPoints => Set<DataPoint>();
+
+    public DbSet<TelemetrySource> TelemetrySources => Set<TelemetrySource>();
+
+    public DbSet<ProtocolMapping> ProtocolMappings => Set<ProtocolMapping>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

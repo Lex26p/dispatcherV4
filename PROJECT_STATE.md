@@ -216,3 +216,11 @@
 - Adds Blazor `/equipment` page, navigation entry and Equipment methods in `DispatcherApiClient`.
 - No new migration, domain entity or telemetry configuration.
 - UI is intentionally basic and will be polished in later UX hardening.
+
+
+## Step 9A package note
+- Previous confirmed commit: 0469e0bf5d369bb2f8dc42a7c8748affe654410c
+- Step: 9A — Telemetry domain and persistence
+- Scope: DataPoint, TelemetrySource, ProtocolMapping, EF mappings, telemetry baseline migration, tests.
+- Out of scope: telemetry API, Web UI, current values, history, polling workers, real protocol calls.
+- Next planned step: Step 9B — Telemetry configuration API.
