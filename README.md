@@ -1,22 +1,16 @@
-# Dispatcher Step 10A — Current Values Domain and Persistence
+# Dispatcher Step 10C — Current Values Web UI
 
-This archive adds the current-value and historical-value persistence baseline.
+This archive adds a Web UI slice for current telemetry values.
 
-It assumes Steps 0A through 9C are already applied.
+It assumes Steps 0A through 10B are already applied.
 
 Added:
 
-- `CurrentValue`
-- `HistoricalValue`
-- `telemetry.current_values`
-- `telemetry.historical_values`
-- migration `20260718005000_AddCurrentValuesBaseline`
-- unit tests for sequence guard and append-only sample shape
-- integration model smoke for current/history value tables
+- Web route `/telemetry/current`
+- navigation entry for current values
+- `DispatcherApiClient` methods for current/history values
+- manual current value upsert form
+- current values list
+- recent history table for a selected DataPoint
 
-This step does not add current values API, SignalR, polling workers, history UI, or realtime delivery.
-
-
-## Step 10B
-- Added Current Values REST API baseline.
-- Commit: pending.
+This step does not add SignalR, polling workers, freshness workers, alarm evaluation, charting, or dashboard widgets.

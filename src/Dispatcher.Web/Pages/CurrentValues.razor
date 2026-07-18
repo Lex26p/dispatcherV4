@@ -1,0 +1,612 @@
+@page "/telemetry/current"
+@using Dispatcher.Contracts.Assets
+@using Dispatcher.Contracts.Telemetry
+@inject DispatcherApiClient Api
+
+<PageTitle>Диспетчер · Текущие значения</PageTitle>
+
+<section class="workspace-page current-values-page">
+    <div class="page-heading split-heading">
+        <div>
+            <p class="eyebrow">Telemetry Values</p>
+            <h1>Текущие значения</h1>
+            <p>Просмотр current values и ручной upsert для локального smoke/debug. SignalR и worker появятся отдельными шагами.</p>
+        </div>
+        <div class="page-actions">
+            <button type="button" class="secondary-button" @onclick="ReloadAsync" disabled="@isBusy">Обновить</button>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(errorMessage))
+    {
+        <section class="alert-panel danger" role="alert">
+            <strong>Ошибка</strong>
+            <span>@errorMessage</span>
+        </section>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(infoMessage))
+    {
+        <section class="alert-panel" role="status">
+            <strong>Статус</strong>
+            <span>@infoMessage</span>
+        </section>
+    }
+
+    <section class="content-panel">
+        <div class="panel-heading-row">
+            <div>
+                <h2>Фильтр значений</h2>
+                <p>@StatusText</p>
+            </div>
+            <div class="filter-row">
+                <label>
+                    <span>Локация</span>
+                    <select @bind="selectedLocationIdText" @bind:after="OnLocationFilterChangedAsync">
+                        <option value="">Все локации</option>
+                        @foreach (var location in locations.OrderBy(item => item.Code, StringComparer.OrdinalIgnoreCase))
+                        {
+                            <option value="@location.Id">@location.Code · @location.Name</option>
+                        }
+                    </select>
+                </label>
+                <label>
+                    <span>Оборудование</span>
+                    <select @bind="selectedEquipmentIdText" @bind:after="ReloadValuesAsync">
+                        <option value="">Все оборудование</option>
+                        @foreach (var item in EquipmentForSelectedLocation)
+                        {
+                            <option value="@item.Id">@item.Code · @item.Name</option>
+                        }
+                    </select>
+                </label>
+            </div>
+        </div>
+    </section>
+
+    <section class="content-panel">
+        <div class="panel-heading-row">
+            <div>
+                <h2>Ручной upsert</h2>
+                <p>Временная операторско-инженерная форма до появления polling worker. Последовательность должна расти.</p>
+            </div>
+        </div>
+
+        @if (ActiveDataPoints.Count == 0)
+        {
+            <div class="empty-state compact-empty">
+                <h2>Нет активных DataPoint</h2>
+                <p>Сначала создай DataPoint на странице <a href="/telemetry/configuration">/telemetry/configuration</a>.</p>
+            </div>
+        }
+        else
+        {
+            <div class="form-grid">
+                <label class="wide-field">
+                    <span>DataPoint</span>
+                    <select @bind="selectedUpsertDataPointIdText" @bind:after="OnUpsertDataPointChanged">
+                        @foreach (var point in ActiveDataPoints)
+                        {
+                            <option value="@point.Id">@point.Code · @point.Name · @EquipmentLabel(point.EquipmentId)</option>
+                        }
+                    </select>
+                </label>
+                <label>
+                    <span>Источник</span>
+                    <select @bind="selectedTelemetrySourceIdText">
+                        <option value="">Без источника</option>
+                        @foreach (var source in ActiveSources)
+                        {
+                            <option value="@source.Id">@source.Code · @source.Protocol</option>
+                        }
+                    </select>
+                </label>
+                <label>
+                    <span>Sequence</span>
+                    <input type="number" min="1" @bind="newSequence" />
+                </label>
+                <label>
+                    <span>Raw value</span>
+                    <input @bind="newRawValue" placeholder="21.7" />
+                </label>
+                <label>
+                    <span>Quality</span>
+                    <select @bind="newQuality">
+                        @foreach (var quality in QualityOptions)
+                        {
+                            <option value="@quality">@quality</option>
+                        }
+                    </select>
+                </label>
+                <label>
+                    <span>Source timestamp UTC</span>
+                    <input @bind="newSourceTimestampUtcText" placeholder="2026-07-18T12:00:00+00:00" />
+                </label>
+                <label>
+                    <span>Unit</span>
+                    <input @bind="newUnit" placeholder="C" />
+                </label>
+                <label class="wide-field">
+                    <span>Error message</span>
+                    <input @bind="newErrorMessage" placeholder="Только для плохого качества/ошибок" />
+                </label>
+            </div>
+
+            <button type="button" class="primary-button" @onclick="UpsertValueAsync" disabled="@isBusy">Записать current value</button>
+        }
+    </section>
+
+    <section class="content-panel">
+        <div class="panel-heading-row">
+            <div>
+                <h2>Current values</h2>
+                <p>Source of truth — REST API и PostgreSQL. Эта страница пока не получает realtime events.</p>
+            </div>
+        </div>
+
+        @if (isLoading)
+        {
+            <div class="empty-state compact-empty">
+                <h2>Загрузка</h2>
+                <p>Читаю текущие значения из API.</p>
+            </div>
+        }
+        else if (currentValues.Count == 0)
+        {
+            <div class="empty-state compact-empty">
+                <h2>Значений пока нет</h2>
+                <p>Запиши первое значение через форму выше или через API smoke test.</p>
+            </div>
+        }
+        else
+        {
+            <div class="value-list">
+                @foreach (var value in OrderedCurrentValues)
+                {
+                    var point = FindDataPoint(value.DataPointId);
+                    <article class="value-row @(value.IsFresh ? "fresh" : "stale")">
+                        <div class="value-main">
+                            <strong>@DataPointLabel(value.DataPointId)</strong>
+                            <span>@EquipmentLabel(point?.EquipmentId)</span>
+                            <small>@TelemetrySourceLabel(value.TelemetrySourceId)</small>
+                        </div>
+                        <div class="value-reading">
+                            <strong>@value.RawValue @(value.Unit ?? string.Empty)</strong>
+                            <span>@value.ValueKind · @value.Quality</span>
+                        </div>
+                        <div class="value-meta">
+                            <span>@value.Freshness</span>
+                            <small>seq @value.Sequence</small>
+                            <small>@value.SourceTimestampUtc.ToLocalTime().ToString("dd.MM.yyyy HH:mm:ss")</small>
+                        </div>
+                        <div class="equipment-actions">
+                            <button type="button" class="secondary-button" @onclick="() => LoadHistoryAsync(value.DataPointId)" disabled="@isBusy">История</button>
+                            <button type="button" class="secondary-button" @onclick="() => PrepareUpsert(value)" disabled="@isBusy">Повторить</button>
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+    </section>
+
+    @if (selectedHistoryDataPointId.HasValue)
+    {
+        <section class="content-panel">
+            <div class="panel-heading-row">
+                <div>
+                    <h2>History: @DataPointLabel(selectedHistoryDataPointId.Value)</h2>
+                    <p>Последние @history.Count sample. История append-only; current row отдельно.</p>
+                </div>
+                <div class="page-actions">
+                    <button type="button" class="secondary-button" @onclick="ClearHistory" disabled="@isBusy">Скрыть</button>
+                </div>
+            </div>
+
+            @if (history.Count == 0)
+            {
+                <div class="empty-state compact-empty">
+                    <h2>Истории пока нет</h2>
+                    <p>Запиши несколько значений для выбранного DataPoint.</p>
+                </div>
+            }
+            else
+            {
+                <div class="history-table-wrap">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Sequence</th>
+                                <th>Value</th>
+                                <th>Quality</th>
+                                <th>Source time</th>
+                                <th>Received</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in history.OrderByDescending(item => item.Sequence))
+                            {
+                                <tr>
+                                    <td>@item.Sequence</td>
+                                    <td>@item.RawValue @(item.Unit ?? string.Empty)</td>
+                                    <td>@item.Quality</td>
+                                    <td>@item.SourceTimestampUtc.ToLocalTime().ToString("dd.MM.yyyy HH:mm:ss")</td>
+                                    <td>@item.ReceivedAtUtc.ToLocalTime().ToString("dd.MM.yyyy HH:mm:ss")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </section>
+    }
+</section>
+
+@code {
+    private static readonly string[] QualityOptions = ["Good", "Uncertain", "Bad", "Stale"];
+
+    private List<LocationDto> locations = [];
+    private List<EquipmentDto> equipment = [];
+    private List<DataPointDto> dataPoints = [];
+    private List<TelemetrySourceDto> sources = [];
+    private List<CurrentValueDto> currentValues = [];
+    private List<HistoricalValueDto> history = [];
+
+    private string? errorMessage;
+    private string? infoMessage;
+    private bool isLoading = true;
+    private bool isBusy;
+
+    private string selectedLocationIdText = string.Empty;
+    private string selectedEquipmentIdText = string.Empty;
+    private string selectedUpsertDataPointIdText = string.Empty;
+    private string selectedTelemetrySourceIdText = string.Empty;
+    private long newSequence = 1;
+    private string newRawValue = "21.7";
+    private string? newUnit = "C";
+    private string newQuality = "Good";
+    private string newSourceTimestampUtcText = DateTimeOffset.UtcNow.ToString("O");
+    private string? newErrorMessage;
+    private Guid? selectedHistoryDataPointId;
+
+    private IReadOnlyList<EquipmentDto> EquipmentForSelectedLocation => equipment
+        .Where(item => !item.IsArchived)
+        .Where(item => string.IsNullOrWhiteSpace(selectedLocationIdText) || item.LocationId.ToString() == selectedLocationIdText)
+        .OrderBy(item => item.Code, StringComparer.OrdinalIgnoreCase)
+        .ToArray();
+
+    private IReadOnlyList<DataPointDto> ActiveDataPoints => dataPoints
+        .Where(item => !item.IsArchived)
+        .Where(item => string.IsNullOrWhiteSpace(selectedEquipmentIdText) || item.EquipmentId.ToString() == selectedEquipmentIdText)
+        .Where(item => string.IsNullOrWhiteSpace(selectedLocationIdText) || FindEquipment(item.EquipmentId)?.LocationId.ToString() == selectedLocationIdText)
+        .OrderBy(item => item.Code, StringComparer.OrdinalIgnoreCase)
+        .ToArray();
+
+    private IReadOnlyList<TelemetrySourceDto> ActiveSources => sources
+        .Where(item => !item.IsArchived)
+        .OrderBy(item => item.Code, StringComparer.OrdinalIgnoreCase)
+        .ToArray();
+
+    private IEnumerable<CurrentValueDto> OrderedCurrentValues => currentValues
+        .OrderBy(item => DataPointLabel(item.DataPointId), StringComparer.OrdinalIgnoreCase);
+
+    private string StatusText => currentValues.Count == 0
+        ? "Нет current values для выбранного фильтра."
+        : $"Всего current values: {currentValues.Count}; fresh: {currentValues.Count(item => item.IsFresh)}; stale/other: {currentValues.Count(item => !item.IsFresh)}.";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ReloadAsync();
+    }
+
+    private async Task ReloadAsync()
+    {
+        isLoading = true;
+        errorMessage = null;
+        infoMessage = null;
+
+        try
+        {
+            locations = (await Api.GetLocationsAsync(includeArchived: true)).ToList();
+            equipment = (await Api.GetEquipmentAsync(locationId: null, includeArchived: true)).ToList();
+            dataPoints = (await Api.GetDataPointsAsync(equipmentId: null, includeArchived: true)).ToList();
+            sources = (await Api.GetTelemetrySourcesAsync(includeArchived: true)).ToList();
+            EnsureDefaultSelections();
+            await ReloadValuesAsync(setLoading: false);
+        }
+        catch (Exception exception)
+        {
+            errorMessage = ToUserMessage(exception);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task OnLocationFilterChangedAsync()
+    {
+        if (!string.IsNullOrWhiteSpace(selectedEquipmentIdText))
+        {
+            var selectedEquipment = FindEquipment(Guid.Parse(selectedEquipmentIdText));
+            if (selectedEquipment is null || (!string.IsNullOrWhiteSpace(selectedLocationIdText) && selectedEquipment.LocationId.ToString() != selectedLocationIdText))
+            {
+                selectedEquipmentIdText = string.Empty;
+            }
+        }
+
+        EnsureDefaultSelections();
+        await ReloadValuesAsync();
+    }
+
+    private async Task ReloadValuesAsync()
+    {
+        await ReloadValuesAsync(setLoading: true);
+    }
+
+    private async Task ReloadValuesAsync(bool setLoading)
+    {
+        if (setLoading)
+        {
+            isLoading = true;
+        }
+
+        errorMessage = null;
+
+        try
+        {
+            var locationId = string.IsNullOrWhiteSpace(selectedLocationIdText) ? (Guid?)null : Guid.Parse(selectedLocationIdText);
+            var equipmentId = string.IsNullOrWhiteSpace(selectedEquipmentIdText) ? (Guid?)null : Guid.Parse(selectedEquipmentIdText);
+            currentValues = (await Api.GetCurrentValuesAsync(dataPointId: null, equipmentId, locationId)).ToList();
+            EnsureDefaultSelections();
+
+            if (selectedHistoryDataPointId.HasValue)
+            {
+                await LoadHistoryAsync(selectedHistoryDataPointId.Value, setBusy: false);
+            }
+        }
+        catch (Exception exception)
+        {
+            errorMessage = ToUserMessage(exception);
+        }
+        finally
+        {
+            if (setLoading)
+            {
+                isLoading = false;
+            }
+        }
+    }
+
+    private void OnUpsertDataPointChanged()
+    {
+        var point = SelectedUpsertDataPoint();
+        if (point is null)
+        {
+            return;
+        }
+
+        newUnit = point.Unit ?? newUnit;
+        var current = currentValues.FirstOrDefault(item => item.DataPointId == point.Id);
+        newSequence = Math.Max(newSequence, (current?.Sequence ?? 0) + 1);
+    }
+
+    private async Task UpsertValueAsync()
+    {
+        var point = SelectedUpsertDataPoint();
+        if (point is null)
+        {
+            errorMessage = "Выбери DataPoint.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(newRawValue))
+        {
+            errorMessage = "Raw value обязателен.";
+            return;
+        }
+
+        if (!DateTimeOffset.TryParse(newSourceTimestampUtcText, out var sourceTimestampUtc))
+        {
+            errorMessage = "Source timestamp должен быть ISO datetime, например 2026-07-18T12:00:00+00:00.";
+            return;
+        }
+
+        await RunBusyAsync(async () =>
+        {
+            var sourceId = string.IsNullOrWhiteSpace(selectedTelemetrySourceIdText)
+                ? (Guid?)null
+                : Guid.Parse(selectedTelemetrySourceIdText);
+
+            var response = await Api.UpsertCurrentValueAsync(new UpsertCurrentValueRequest(
+                point.Id,
+                sourceId,
+                Math.Max(1, newSequence),
+                point.ValueKind,
+                newRawValue.Trim(),
+                BlankToNull(newUnit),
+                newQuality,
+                sourceTimestampUtc.ToUniversalTime(),
+                BlankToNull(newErrorMessage)));
+
+            infoMessage = response.Applied
+                ? $"Значение применено: {response.Result}."
+                : $"Значение проигнорировано: {response.Result}.";
+
+            newSequence = response.CurrentValue.Sequence + 1;
+            newSourceTimestampUtcText = DateTimeOffset.UtcNow.ToString("O");
+            await ReloadValuesAsync(setLoading: false);
+            selectedHistoryDataPointId = point.Id;
+            await LoadHistoryAsync(point.Id, setBusy: false);
+        });
+    }
+
+    private async Task LoadHistoryAsync(Guid dataPointId)
+    {
+        await LoadHistoryAsync(dataPointId, setBusy: true);
+    }
+
+    private async Task LoadHistoryAsync(Guid dataPointId, bool setBusy)
+    {
+        if (setBusy)
+        {
+            isBusy = true;
+        }
+
+        errorMessage = null;
+
+        try
+        {
+            selectedHistoryDataPointId = dataPointId;
+            history = (await Api.GetHistoricalValuesAsync(dataPointId, fromUtc: null, toUtc: null, limit: 25)).ToList();
+        }
+        catch (Exception exception)
+        {
+            errorMessage = ToUserMessage(exception);
+        }
+        finally
+        {
+            if (setBusy)
+            {
+                isBusy = false;
+            }
+        }
+    }
+
+    private void ClearHistory()
+    {
+        selectedHistoryDataPointId = null;
+        history = [];
+        errorMessage = null;
+    }
+
+    private void PrepareUpsert(CurrentValueDto value)
+    {
+        selectedUpsertDataPointIdText = value.DataPointId.ToString();
+        selectedTelemetrySourceIdText = value.TelemetrySourceId?.ToString() ?? string.Empty;
+        newSequence = value.Sequence + 1;
+        newRawValue = value.RawValue;
+        newUnit = value.Unit;
+        newQuality = value.Quality;
+        newErrorMessage = value.ErrorMessage;
+        newSourceTimestampUtcText = DateTimeOffset.UtcNow.ToString("O");
+        infoMessage = $"Форма подготовлена для {DataPointLabel(value.DataPointId)}; sequence увеличен до {newSequence}.";
+    }
+
+    private async Task RunBusyAsync(Func<Task> operation)
+    {
+        isBusy = true;
+        errorMessage = null;
+        infoMessage = null;
+
+        try
+        {
+            await operation();
+        }
+        catch (Exception exception)
+        {
+            errorMessage = ToUserMessage(exception);
+        }
+        finally
+        {
+            isBusy = false;
+        }
+    }
+
+    private void EnsureDefaultSelections()
+    {
+        if (!string.IsNullOrWhiteSpace(selectedEquipmentIdText) && EquipmentForSelectedLocation.All(item => item.Id.ToString() != selectedEquipmentIdText))
+        {
+            selectedEquipmentIdText = string.Empty;
+        }
+
+        if (!string.IsNullOrWhiteSpace(selectedUpsertDataPointIdText) && ActiveDataPoints.All(item => item.Id.ToString() != selectedUpsertDataPointIdText))
+        {
+            selectedUpsertDataPointIdText = string.Empty;
+        }
+
+        selectedUpsertDataPointIdText = string.IsNullOrWhiteSpace(selectedUpsertDataPointIdText)
+            ? ActiveDataPoints.FirstOrDefault()?.Id.ToString() ?? string.Empty
+            : selectedUpsertDataPointIdText;
+
+        if (!string.IsNullOrWhiteSpace(selectedTelemetrySourceIdText) && ActiveSources.All(item => item.Id.ToString() != selectedTelemetrySourceIdText))
+        {
+            selectedTelemetrySourceIdText = string.Empty;
+        }
+
+        selectedTelemetrySourceIdText = string.IsNullOrWhiteSpace(selectedTelemetrySourceIdText)
+            ? ActiveSources.FirstOrDefault()?.Id.ToString() ?? string.Empty
+            : selectedTelemetrySourceIdText;
+
+        var point = SelectedUpsertDataPoint();
+        if (point is not null)
+        {
+            if (string.IsNullOrWhiteSpace(newUnit))
+            {
+                newUnit = point.Unit;
+            }
+
+            var current = currentValues.FirstOrDefault(item => item.DataPointId == point.Id);
+            newSequence = Math.Max(newSequence, (current?.Sequence ?? 0) + 1);
+        }
+    }
+
+    private DataPointDto? SelectedUpsertDataPoint()
+    {
+        return string.IsNullOrWhiteSpace(selectedUpsertDataPointIdText)
+            ? null
+            : dataPoints.FirstOrDefault(item => item.Id.ToString() == selectedUpsertDataPointIdText);
+    }
+
+    private DataPointDto? FindDataPoint(Guid dataPointId)
+    {
+        return dataPoints.FirstOrDefault(item => item.Id == dataPointId);
+    }
+
+    private EquipmentDto? FindEquipment(Guid equipmentId)
+    {
+        return equipment.FirstOrDefault(item => item.Id == equipmentId);
+    }
+
+    private string DataPointLabel(Guid dataPointId)
+    {
+        var point = FindDataPoint(dataPointId);
+        return point is null ? $"DataPoint {dataPointId}" : $"{point.Code} · {point.Name}";
+    }
+
+    private string EquipmentLabel(Guid? equipmentId)
+    {
+        if (!equipmentId.HasValue)
+        {
+            return "Оборудование неизвестно";
+        }
+
+        var item = FindEquipment(equipmentId.Value);
+        return item is null ? "Оборудование недоступно" : $"{item.Code} · {item.Name}";
+    }
+
+    private string TelemetrySourceLabel(Guid? sourceId)
+    {
+        if (!sourceId.HasValue)
+        {
+            return "Источник не указан";
+        }
+
+        var source = sources.FirstOrDefault(item => item.Id == sourceId.Value);
+        return source is null ? "Источник недоступен" : $"{source.Code} · {source.Protocol}";
+    }
+
+    private static string? BlankToNull(string? value)
+    {
+        return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+    }
+
+    private static string ToUserMessage(Exception exception)
+    {
+        return exception switch
+        {
+            DispatcherApiException apiException => $"API вернул {(int)apiException.StatusCode}: {apiException.ResponseBody}",
+            HttpRequestException => "API недоступен. Запусти Dispatcher.Api на http://localhost:5076.",
+            _ => exception.Message
+        };
+    }
+}

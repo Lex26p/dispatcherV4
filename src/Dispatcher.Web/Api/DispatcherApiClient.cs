@@ -192,6 +192,73 @@ public sealed class DispatcherApiClient(HttpClient httpClient)
         return await ReadRequiredAsync<ProtocolMappingDto>(response, cancellationToken);
     }
 
+
+    public async Task<IReadOnlyList<CurrentValueDto>> GetCurrentValuesAsync(Guid? dataPointId, Guid? equipmentId, Guid? locationId, CancellationToken cancellationToken = default)
+    {
+        var query = new List<string>();
+
+        if (dataPointId.HasValue)
+        {
+            query.Add($"dataPointId={Uri.EscapeDataString(dataPointId.Value.ToString())}");
+        }
+
+        if (equipmentId.HasValue)
+        {
+            query.Add($"equipmentId={Uri.EscapeDataString(equipmentId.Value.ToString())}");
+        }
+
+        if (locationId.HasValue)
+        {
+            query.Add($"locationId={Uri.EscapeDataString(locationId.Value.ToString())}");
+        }
+
+        var url = query.Count == 0 ? "/api/values/current" : $"/api/values/current?{string.Join('&', query)}";
+        return await httpClient.GetFromJsonAsync<CurrentValueDto[]>(url, cancellationToken) ?? [];
+    }
+
+    public async Task<CurrentValueDto?> GetCurrentValueAsync(Guid dataPointId, CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.GetAsync($"/api/values/current/{dataPointId}", cancellationToken);
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return null;
+        }
+
+        return await ReadRequiredAsync<CurrentValueDto>(response, cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<HistoricalValueDto>> GetHistoricalValuesAsync(Guid dataPointId, DateTimeOffset? fromUtc, DateTimeOffset? toUtc, int? limit, CancellationToken cancellationToken = default)
+    {
+        var query = new List<string>
+        {
+            $"dataPointId={Uri.EscapeDataString(dataPointId.ToString())}"
+        };
+
+        if (fromUtc.HasValue)
+        {
+            query.Add($"fromUtc={Uri.EscapeDataString(fromUtc.Value.ToString("O"))}");
+        }
+
+        if (toUtc.HasValue)
+        {
+            query.Add($"toUtc={Uri.EscapeDataString(toUtc.Value.ToString("O"))}");
+        }
+
+        if (limit.HasValue)
+        {
+            query.Add($"limit={limit.Value}");
+        }
+
+        var url = $"/api/values/history?{string.Join('&', query)}";
+        return await httpClient.GetFromJsonAsync<HistoricalValueDto[]>(url, cancellationToken) ?? [];
+    }
+
+    public async Task<UpsertCurrentValueResponse> UpsertCurrentValueAsync(UpsertCurrentValueRequest request, CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.PostAsJsonAsync("/api/values/current", request, cancellationToken);
+        return await ReadRequiredAsync<UpsertCurrentValueResponse>(response, cancellationToken);
+    }
+
     private static async Task<T> ReadRequiredAsync<T>(HttpResponseMessage response, CancellationToken cancellationToken)
     {
         if (response.IsSuccessStatusCode)

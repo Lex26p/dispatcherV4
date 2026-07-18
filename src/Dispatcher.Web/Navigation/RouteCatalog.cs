@@ -21,6 +21,7 @@ public static class RouteCatalog
         new("/locations", "Локации", "Лок", "Объекты", "locations.view", true, 40),
         new("/equipment", "Оборудование", "Обор", "Объекты", "equipment.view", true, 50),
         new("/telemetry/configuration", "Телеметрия", "Телем", "Телеметрия", "telemetry.configuration.view", true, 60),
+        new("/telemetry/current", "Текущие значения", "Знач", "Телеметрия", "telemetry.values.view", true, 70),
         new("/admin", "Администрирование", "Адм", "Админ", "identity.users.view", true, 80),
         new("/admin/users", "Пользователи", "Польз", "Админ", "identity.users.view", false, 90),
         new("/forbidden", "Нет доступа", "403", "Система", PermissionNotRequired, false, 900),

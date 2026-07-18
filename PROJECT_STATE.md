@@ -5,8 +5,8 @@
 - Status: In progress
 
 ## Current step
-- Step: 10A
-- Name: Current values domain and persistence
+- Step: 10C
+- Name: Current Values Web UI
 - Status: Ready to apply
 
 ## Recently completed steps
@@ -19,27 +19,28 @@
 - Step 9A: Telemetry domain and persistence — 452138affb73a8bae043eae360bb3de36b7ec791
 - Step 9B: Telemetry configuration API — 1d36e46856818e36d9a256d1256a3e9085fd3602
 - Step 9C: Telemetry configuration Web UI — 9ae0fbfb40e82fb624995ad86a13485f9ecdfc31
+- Step 10A: Current values domain and persistence — 50d977f2a8447faf509bb1a72cbfed1f7bfc003e
+- Step 10B: Current Values API — c77e20fe4c9ca60d3d6d2458b61db594b2505c2f
 
-## Added in Step 10A
-- Domain: `CurrentValue`, `HistoricalValue`.
-- Persistence: `telemetry.current_values`, `telemetry.historical_values`.
-- Migration: `20260718005000_AddCurrentValuesBaseline`.
-- Tests: current sequence guard, historical sample shape, EF model smoke.
+## Added in Step 10C
+- Web route: `/telemetry/current`.
+- Web API client methods for current values and history.
+- Manual current value upsert form for local development smoke checks.
+- Current value list with freshness/quality/sequence/source metadata.
+- Recent history table for a selected DataPoint.
 
 ## Invariants
 - SignalR is not a source of truth.
-- One current row per DataPoint.
-- Current sample update requires a strictly newer sequence.
-- Historical samples are append-oriented and deduplicated by `(data_point_id, sequence)`.
-- Value records include value kind, raw value, unit, quality, source timestamp, receive timestamp and source id.
+- Current values still come from REST API backed by PostgreSQL.
+- Manual Web upsert is development/smoke tooling, not a real telemetry runtime.
+- Value records must keep value kind, raw value, unit, quality, source timestamp, received timestamp, freshness and source id.
 
 ## Known limitations
-- No current values REST API yet.
-- No history query API yet.
 - No SignalR realtime delivery yet.
 - No polling worker writes values yet.
 - No freshness worker yet.
+- No charts/dashboards yet.
 
 ## Next steps
-1. Step 10B — Current values write/read application service and API.
-2. Step 10C — Current values Web read-only view.
+1. Step 10D — SignalR hub for current value notifications.
+2. Step 10E — Simulator polling worker writing through the values service/API boundary.
