@@ -1,0 +1,411 @@
+@page "/equipment"
+@inject DispatcherApiClient Api
+
+<PageTitle>Диспетчер · Оборудование</PageTitle>
+
+<section class="workspace-page equipment-page">
+    <div class="page-heading split-heading">
+        <div>
+            <p class="eyebrow">Asset Model</p>
+            <h1>Оборудование</h1>
+            <p>Канонический реестр оборудования. Здесь нет Modbus/SNMP/OID/register-полей: протоколы появятся позже в TelemetrySource/DataPoint.</p>
+        </div>
+        <div class="page-actions">
+            <button type="button" class="secondary-button" @onclick="ReloadAsync" disabled="@isBusy">Обновить</button>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(errorMessage))
+    {
+        <section class="alert-panel danger" role="alert">
+            <strong>Ошибка</strong>
+            <span>@errorMessage</span>
+        </section>
+    }
+
+    <section class="content-panel">
+        <div class="panel-heading-row">
+            <div>
+                <h2>Создать оборудование</h2>
+                <p>Оборудование обязательно привязано к локации, но не содержит протокольную конфигурацию.</p>
+            </div>
+        </div>
+
+        @if (ActiveLocations.Count == 0)
+        {
+            <div class="empty-state compact-empty">
+                <h2>Нет активных локаций</h2>
+                <p>Сначала создай локацию на странице <a href="/locations">/locations</a>.</p>
+            </div>
+        }
+        else
+        {
+            <div class="form-grid">
+                <label>
+                    <span>Локация</span>
+                    <select @bind="newLocationIdText">
+                        @foreach (var location in ActiveLocations)
+                        {
+                            <option value="@location.Id">@location.Code · @location.Name</option>
+                        }
+                    </select>
+                </label>
+                <label>
+                    <span>Код</span>
+                    <input @bind="newCode" placeholder="PUMP-001" />
+                </label>
+                <label>
+                    <span>Название</span>
+                    <input @bind="newName" placeholder="Насос 001" />
+                </label>
+                <label class="wide-field">
+                    <span>Описание</span>
+                    <input @bind="newDescription" placeholder="Необязательно" />
+                </label>
+            </div>
+
+            <button type="button" class="primary-button" @onclick="CreateAsync" disabled="@isBusy">Создать</button>
+        }
+    </section>
+
+    <section class="content-panel">
+        <div class="panel-heading-row">
+            <div>
+                <h2>Реестр оборудования</h2>
+                <p>@StatusText</p>
+            </div>
+            <div class="filter-row">
+                <label>
+                    <span>Локация</span>
+                    <select @bind="selectedLocationFilter" @bind:after="ReloadEquipmentAsync">
+                        <option value="">Все локации</option>
+                        @foreach (var location in locations.OrderBy(location => location.Code, StringComparer.OrdinalIgnoreCase))
+                        {
+                            <option value="@location.Id">@location.Code · @location.Name</option>
+                        }
+                    </select>
+                </label>
+                <label class="inline-toggle">
+                    <input type="checkbox" @bind="includeArchived" @bind:after="ReloadEquipmentAsync" />
+                    <span>Показывать архив</span>
+                </label>
+            </div>
+        </div>
+
+        @if (isLoading)
+        {
+            <div class="empty-state compact-empty">
+                <h2>Загрузка</h2>
+                <p>Читаю оборудование из API.</p>
+            </div>
+        }
+        else if (equipment.Count == 0)
+        {
+            <div class="empty-state compact-empty">
+                <h2>Оборудования пока нет</h2>
+                <p>Создай первый объект оборудования внутри существующей локации.</p>
+            </div>
+        }
+        else
+        {
+            <div class="equipment-list">
+                @foreach (var item in OrderedEquipment)
+                {
+                    <article class="equipment-row @(item.IsArchived ? "archived" : string.Empty)">
+                        <div class="equipment-main">
+                            <strong>@item.Name</strong>
+                            <span>@item.Code</span>
+                            <small>@LocationLabel(item.LocationId)</small>
+                        </div>
+                        <div class="equipment-description">
+                            @(string.IsNullOrWhiteSpace(item.Description) ? "Описание не задано" : item.Description)
+                        </div>
+                        <div class="equipment-meta">
+                            <span>@(item.IsArchived ? "Архив" : "Активно")</span>
+                            <small>@item.UpdatedAtUtc.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</small>
+                        </div>
+                        <div class="equipment-actions">
+                            <button type="button" class="secondary-button" @onclick="() => BeginEdit(item)" disabled="@isBusy">Изменить</button>
+                            @if (!item.IsArchived)
+                            {
+                                <button type="button" class="danger-button" @onclick="() => ArchiveAsync(item.Id)" disabled="@isBusy">В архив</button>
+                            }
+                            else
+                            {
+                                <button type="button" class="secondary-button" @onclick="() => RestoreAsync(item.Id)" disabled="@isBusy">Вернуть</button>
+                            }
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+    </section>
+
+    @if (editing is not null)
+    {
+        <section class="content-panel edit-panel">
+            <h2>Редактирование оборудования</h2>
+            <p><code>@editing.Code</code></p>
+            <div class="form-grid">
+                <label>
+                    <span>Название</span>
+                    <input @bind="editName" />
+                </label>
+                <label>
+                    <span>Локация</span>
+                    <select @bind="editLocationIdText">
+                        @foreach (var location in ActiveLocations)
+                        {
+                            <option value="@location.Id">@location.Code · @location.Name</option>
+                        }
+                    </select>
+                </label>
+                <label class="wide-field">
+                    <span>Описание</span>
+                    <input @bind="editDescription" />
+                </label>
+            </div>
+            <div class="button-row">
+                <button type="button" class="primary-button" @onclick="SaveEditAsync" disabled="@isBusy">Сохранить</button>
+                <button type="button" class="secondary-button" @onclick="CancelEdit" disabled="@isBusy">Отмена</button>
+            </div>
+        </section>
+    }
+</section>
+
+@code {
+    private List<LocationDto> locations = [];
+    private List<EquipmentDto> equipment = [];
+    private EquipmentDto? editing;
+    private string? errorMessage;
+    private bool isLoading = true;
+    private bool isBusy;
+    private bool includeArchived;
+
+    private string selectedLocationFilter = string.Empty;
+    private string newLocationIdText = string.Empty;
+    private string newCode = string.Empty;
+    private string newName = string.Empty;
+    private string? newDescription;
+
+    private string editLocationIdText = string.Empty;
+    private string editName = string.Empty;
+    private string? editDescription;
+
+    private IReadOnlyList<LocationDto> ActiveLocations => locations
+        .Where(location => !location.IsArchived)
+        .OrderBy(location => location.Code, StringComparer.OrdinalIgnoreCase)
+        .ToArray();
+
+    private IEnumerable<EquipmentDto> OrderedEquipment => equipment
+        .OrderBy(item => LocationLabel(item.LocationId), StringComparer.OrdinalIgnoreCase)
+        .ThenBy(item => item.Code, StringComparer.OrdinalIgnoreCase);
+
+    private string StatusText => equipment.Count == 0
+        ? "Нет данных."
+        : $"Всего: {equipment.Count}; активных: {equipment.Count(item => !item.IsArchived)}.";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ReloadAsync();
+    }
+
+    private async Task ReloadAsync()
+    {
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            locations = (await Api.GetLocationsAsync(includeArchived: true)).ToList();
+            EnsureDefaultLocationSelection();
+            await ReloadEquipmentAsync(setLoading: false);
+        }
+        catch (Exception exception)
+        {
+            errorMessage = ToUserMessage(exception);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task ReloadEquipmentAsync()
+    {
+        await ReloadEquipmentAsync(setLoading: true);
+    }
+
+    private async Task ReloadEquipmentAsync(bool setLoading)
+    {
+        if (setLoading)
+        {
+            isLoading = true;
+        }
+
+        errorMessage = null;
+
+        try
+        {
+            var locationId = string.IsNullOrWhiteSpace(selectedLocationFilter)
+                ? (Guid?)null
+                : Guid.Parse(selectedLocationFilter);
+
+            equipment = (await Api.GetEquipmentAsync(locationId, includeArchived)).ToList();
+        }
+        catch (Exception exception)
+        {
+            errorMessage = ToUserMessage(exception);
+        }
+        finally
+        {
+            if (setLoading)
+            {
+                isLoading = false;
+            }
+        }
+    }
+
+    private async Task CreateAsync()
+    {
+        if (string.IsNullOrWhiteSpace(newLocationIdText))
+        {
+            errorMessage = "Выбери локацию.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(newCode) || string.IsNullOrWhiteSpace(newName))
+        {
+            errorMessage = "Код и название обязательны.";
+            return;
+        }
+
+        await RunBusyAsync(async () =>
+        {
+            var locationId = Guid.Parse(newLocationIdText);
+            await Api.CreateEquipmentAsync(new CreateEquipmentRequest(locationId, newCode.Trim(), newName.Trim(), BlankToNull(newDescription)));
+            newCode = string.Empty;
+            newName = string.Empty;
+            newDescription = null;
+            await ReloadEquipmentAsync();
+        });
+    }
+
+    private void BeginEdit(EquipmentDto item)
+    {
+        editing = item;
+        editName = item.Name;
+        editDescription = item.Description;
+        editLocationIdText = item.LocationId.ToString();
+        errorMessage = null;
+    }
+
+    private void CancelEdit()
+    {
+        editing = null;
+        errorMessage = null;
+    }
+
+    private async Task SaveEditAsync()
+    {
+        if (editing is null)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(editName))
+        {
+            errorMessage = "Название обязательно.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(editLocationIdText))
+        {
+            errorMessage = "Локация обязательна.";
+            return;
+        }
+
+        var item = editing;
+        await RunBusyAsync(async () =>
+        {
+            await Api.UpdateEquipmentAsync(item.Id, new UpdateEquipmentRequest(editName.Trim(), BlankToNull(editDescription)));
+
+            var targetLocationId = Guid.Parse(editLocationIdText);
+            if (targetLocationId != item.LocationId)
+            {
+                await Api.MoveEquipmentAsync(item.Id, new MoveEquipmentRequest(targetLocationId));
+            }
+
+            editing = null;
+            await ReloadEquipmentAsync();
+        });
+    }
+
+    private async Task ArchiveAsync(Guid id)
+    {
+        await RunBusyAsync(async () =>
+        {
+            await Api.ArchiveEquipmentAsync(id, new ArchiveEquipmentRequest("Archived from Step 8C web UI."));
+            await ReloadEquipmentAsync();
+        });
+    }
+
+    private async Task RestoreAsync(Guid id)
+    {
+        await RunBusyAsync(async () =>
+        {
+            await Api.RestoreEquipmentAsync(id, new RestoreEquipmentRequest("Restored from Step 8C web UI."));
+            await ReloadEquipmentAsync();
+        });
+    }
+
+    private async Task RunBusyAsync(Func<Task> operation)
+    {
+        isBusy = true;
+        errorMessage = null;
+
+        try
+        {
+            await operation();
+        }
+        catch (Exception exception)
+        {
+            errorMessage = ToUserMessage(exception);
+        }
+        finally
+        {
+            isBusy = false;
+        }
+    }
+
+    private void EnsureDefaultLocationSelection()
+    {
+        if (!string.IsNullOrWhiteSpace(newLocationIdText) && ActiveLocations.Any(location => location.Id.ToString() == newLocationIdText))
+        {
+            return;
+        }
+
+        newLocationIdText = ActiveLocations.FirstOrDefault()?.Id.ToString() ?? string.Empty;
+    }
+
+    private string LocationLabel(Guid locationId)
+    {
+        var location = locations.FirstOrDefault(item => item.Id == locationId);
+        return location is null ? "Локация недоступна" : $"{location.Code} · {location.Name}";
+    }
+
+    private static string? BlankToNull(string? value)
+    {
+        return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+    }
+
+    private static string ToUserMessage(Exception exception)
+    {
+        return exception switch
+        {
+            DispatcherApiException apiException => $"API вернул {(int)apiException.StatusCode}: {apiException.ResponseBody}",
+            HttpRequestException => "API недоступен. Запусти Dispatcher.Api на http://localhost:5076.",
+            _ => exception.Message
+        };
+    }
+}

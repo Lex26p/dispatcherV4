@@ -1,29 +1,50 @@
 # Диспетчер
 
-Industrial Dispatcher baseline repository.
+Промышленная платформа диспетчеризации, эксплуатации, событий, инцидентов и ТОиР.
 
-## Current development state
+## Текущий статус
 
-- Current small step: Step 8B — Equipment API.
-- Last completed step: Step 8A — Equipment domain and persistence.
-- Last completed commit: `3bc727ce2325cecaefd7d582f2b8d956a06204b8`.
+Текущий шаг: **Step 8C — Equipment Web UI**.
 
-## Local checks
+Этот шаг намеренно малый: он добавляет только Blazor UI для существующего Equipment API. Новых миграций, telemetry-моделей и protocol-полей нет.
+
+## Источники истины
+
+- `DISPATCHER_TECHNICAL_SPECIFICATION_AND_ROADMAP.md` — master-ТЗ и roadmap.
+- `DISPATCHER_AI_IMPLEMENTATION_SPEC.md` — AI-focused execution guide.
+- `PROJECT_STATE.md` — текущее состояние репозитория и следующий шаг.
+
+## Проверка
 
 ```powershell
+cd C:\Projects\dispatcherV4
 dotnet restore .\Dispatcher.sln
 dotnet build .\Dispatcher.sln --no-restore
 dotnet test .\Dispatcher.sln --no-build
 ```
 
-## Database
+## Локальный запуск
 
-PostgreSQL connection for local development:
+API:
 
 ```powershell
+cd C:\Projects\dispatcherV4
 $env:DISPATCHER_CONNECTION_STRING="Host=localhost;Port=5432;Database=dispatcher;Username=postgres;Password=postgres;Include Error Detail=false"
+dotnet run --project .\src\Dispatcher.Api\Dispatcher.Api.csproj
 ```
 
-## Step 8B scope
+Web:
 
-Step 8B adds REST API for canonical Equipment. Equipment remains an asset registry entity only: no protocol addresses, telemetry points, Modbus, SNMP, commands, maintenance, current values or history are introduced in this step.
+```powershell
+cd C:\Projects\dispatcherV4
+dotnet run --project .\src\Dispatcher.Web\Dispatcher.Web.csproj
+```
+
+Проверить `/equipment`.
+
+## Важные правила
+
+- Не добавлять protocol fields в Equipment.
+- Не добавлять telemetry в Step 8C.
+- Не считать Web UI финальным дизайном.
+- После каждого шага обновлять `PROJECT_STATE.md`.

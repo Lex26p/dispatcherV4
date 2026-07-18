@@ -16,8 +16,8 @@
 - Goal: Locations and baseline asset model
 
 ## Current step
-- Step: 8B
-- Name: Equipment API and application layer
+- Step: 8C
+- Name: Equipment Web UI
 - Status: Ready for local verification
 - Started: 2026-07-18T00:00:00Z
 - Completed: pending local verification and commit
@@ -47,12 +47,13 @@
 | Step 7A | Split Locations into smaller backend-first substeps | Accepted | Location domain and persistence are implemented before API and UI to reduce change size |
 | Step 7C | Keep Locations Web UI small and API-backed | Accepted | Web UI consumes REST API; no new domain or persistence changes in this step |
 | Step 8A | Split Equipment into domain/persistence before API and UI | Accepted | Equipment stays protocol-neutral; TelemetrySource/DataPoint will handle protocol details later |
+| Step 8C | Keep Equipment Web UI separate from API/backend | Accepted | Web UI consumes existing Equipment API; no new domain, persistence or migration changes |
 
 ## Created projects
 | Project | Purpose | Created in step | Build status |
 |---|---|---|---|
 | Dispatcher.Api | ASP.NET Core API composition root, health endpoints, correlation, exception middleware and identity endpoints | 1, 2, 4, 5 | To verify locally |
-| Dispatcher.Web | Blazor WebAssembly shell baseline, route catalog, navigation rail, header, context drawer and baseline identity/admin/settings routes | 1, 5, 6 | To verify locally |
+| Dispatcher.Web | Blazor WebAssembly shell baseline, route catalog, navigation rail, header, context drawer and baseline identity/admin/settings/locations/equipment routes | 1, 5, 6, 7C, 8C | To verify locally |
 | Dispatcher.Domain | Domain primitives, identity access entities, Location and Equipment domain entities | 1, 3, 5, 7A, 8A | To verify locally |
 | Dispatcher.Application | Application abstractions, current user placeholder, correlation context, permission constants and DI registration | 1, 2, 5 | To verify locally |
 | Dispatcher.Infrastructure | Infrastructure adapters baseline, system clock, EF Core PostgreSQL DbContext, identity mappings, Location and Equipment persistence | 1, 4, 5, 7A, 8A | To verify locally |
@@ -119,7 +120,8 @@
 | `/settings` | Shell baseline route | Personal settings placeholder | Manual browser smoke required |
 | `/settings/profile` | Shell baseline route | Profile settings placeholder | Manual browser smoke required |
 | `/admin` | Shell baseline route | Admin landing page | Manual browser smoke required |
-| `/locations` | Locations Web UI | Backend authorization remains source of truth | Manual browser smoke pending |
+| `/locations` | Locations Web UI | Backend authorization remains source of truth | Manual browser smoke passed before Step 7C commit |
+| `/equipment` | Equipment Web UI | Backend authorization remains source of truth | Manual browser smoke pending |
 
 ## Workers
 | Worker/job | Host | Schedule/trigger | Health/metrics | Status |
@@ -152,9 +154,9 @@
 - Step 2 diagnostics exception endpoint is development-only and must not become a business API.
 
 ## Next steps
-1. Step 8B — Equipment API.
-2. Step 8C — Equipment Web UI.
-3. Step 9A — DataPoint and TelemetrySource domain/persistence.
+1. Step 8C — Equipment Web UI.
+2. Step 9A — DataPoint and TelemetrySource domain/persistence.
+3. Step 9B — Telemetry configuration API.
 
 ## Commit hash history
 | Date UTC | Step | Commit hash | Message |
@@ -171,6 +173,7 @@
 | 2026-07-18 | 7B | 2856caead2cda37b723c018e2b88242622063377 | Step 7B: Add Locations API |
 | 2026-07-18 | 7C | b4a4c6db086bb664024bde33238184f27ee59603 | Step 7C: Add Locations Web UI |
 | 2026-07-18 | 8A | 3bc727ce2325cecaefd7d582f2b8d956a06204b8 | Step 8A: Add Equipment domain and persistence |
+| 2026-07-18 | 8B | ab70ec72a6e81eea218447189411eaf204ce03ab | Step 8B: Add Equipment API |
 
 ## Step 7A local verification notes
 - This is an intentionally smaller substep.
@@ -201,8 +204,15 @@
 
 ## Step 8B — Equipment API
 
-- Status: In progress until local build/test/API smoke/commit.
-- Previous step hash: 3bc727ce2325cecaefd7d582f2b8d956a06204b8.
+- Status: Completed.
+- Commit: ab70ec72a6e81eea218447189411eaf204ce03ab.
 - Adds Equipment contracts, application service, EF repository, permissions and REST endpoints.
-- Web UI remains deferred to Step 8C.
 - Protocol configuration remains out of Equipment.
+
+## Step 8C — Equipment Web UI
+
+- Status: In progress until local build/test/browser smoke/commit.
+- Previous step hash: ab70ec72a6e81eea218447189411eaf204ce03ab.
+- Adds Blazor `/equipment` page, navigation entry and Equipment methods in `DispatcherApiClient`.
+- No new migration, domain entity or telemetry configuration.
+- UI is intentionally basic and will be polished in later UX hardening.

@@ -30,6 +30,54 @@ public sealed class DispatcherApiClient(HttpClient httpClient)
         return await ReadRequiredAsync<LocationDto>(response, cancellationToken);
     }
 
+    public async Task<IReadOnlyList<EquipmentDto>> GetEquipmentAsync(Guid? locationId, bool includeArchived, CancellationToken cancellationToken = default)
+    {
+        var query = new List<string>();
+
+        if (locationId.HasValue)
+        {
+            query.Add($"locationId={Uri.EscapeDataString(locationId.Value.ToString())}");
+        }
+
+        if (includeArchived)
+        {
+            query.Add("includeArchived=true");
+        }
+
+        var url = query.Count == 0 ? "/api/equipment" : $"/api/equipment?{string.Join('&', query)}";
+        return await httpClient.GetFromJsonAsync<EquipmentDto[]>(url, cancellationToken) ?? [];
+    }
+
+    public async Task<EquipmentDto> CreateEquipmentAsync(CreateEquipmentRequest request, CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.PostAsJsonAsync("/api/equipment", request, cancellationToken);
+        return await ReadRequiredAsync<EquipmentDto>(response, cancellationToken);
+    }
+
+    public async Task<EquipmentDto> UpdateEquipmentAsync(Guid id, UpdateEquipmentRequest request, CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.PutAsJsonAsync($"/api/equipment/{id}", request, cancellationToken);
+        return await ReadRequiredAsync<EquipmentDto>(response, cancellationToken);
+    }
+
+    public async Task<EquipmentDto> MoveEquipmentAsync(Guid id, MoveEquipmentRequest request, CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.PostAsJsonAsync($"/api/equipment/{id}/move", request, cancellationToken);
+        return await ReadRequiredAsync<EquipmentDto>(response, cancellationToken);
+    }
+
+    public async Task<EquipmentDto> ArchiveEquipmentAsync(Guid id, ArchiveEquipmentRequest request, CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.PostAsJsonAsync($"/api/equipment/{id}/archive", request, cancellationToken);
+        return await ReadRequiredAsync<EquipmentDto>(response, cancellationToken);
+    }
+
+    public async Task<EquipmentDto> RestoreEquipmentAsync(Guid id, RestoreEquipmentRequest request, CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.PostAsJsonAsync($"/api/equipment/{id}/restore", request, cancellationToken);
+        return await ReadRequiredAsync<EquipmentDto>(response, cancellationToken);
+    }
+
     private static async Task<T> ReadRequiredAsync<T>(HttpResponseMessage response, CancellationToken cancellationToken)
     {
         if (response.IsSuccessStatusCode)
