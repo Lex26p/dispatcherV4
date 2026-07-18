@@ -10,6 +10,7 @@
     <PackageReference Include="xunit.runner.visualstudio" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Dispatcher.Application\Dispatcher.Application.csproj" />
     <ProjectReference Include="..\..\src\Dispatcher.Contracts\Dispatcher.Contracts.csproj" />
     <ProjectReference Include="..\..\src\Dispatcher.Domain\Dispatcher.Domain.csproj" />
   </ItemGroup>

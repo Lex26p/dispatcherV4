@@ -6,7 +6,7 @@
 
 Репозиторий очищен от учебного кода и переведен на промышленный baseline.
 
-Текущий шаг: **Step 4 — PostgreSQL infrastructure**.
+Текущий шаг: **Step 5 — Identity/RBAC baseline**.
 
 ## Источники истины
 
