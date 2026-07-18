@@ -6,7 +6,7 @@
 
 Репозиторий очищен от учебного кода и переведен на промышленный baseline.
 
-Текущий шаг: **Step 3 — domain primitives**.
+Текущий шаг: **Step 4 — PostgreSQL infrastructure**.
 
 ## Источники истины
 
@@ -27,23 +27,33 @@
 - `Dispatcher.UnitTests`
 - `Dispatcher.IntegrationTests`
 
-## Step 3 primitives
+## Step 4 database baseline
 
-- `EntityId`
-- `DomainError`
-- `UtcTimestamp`
-- `ConcurrencyToken`
-- `DataQuality`
-- `FreshnessState`
-- `TypedValue`
+- `DispatcherDbContext`
+- `SchemaNames`
+- design-time DbContext factory
+- empty baseline migration `20260718000000_BaselineDatabase`
+- PostgreSQL-aware `/api/health/ready`
+- optional PostgreSQL integration smoke test
 
-## Проверка
+No business tables are created in this step.
+
+## Проверка без локальной БД
 
 ```powershell
 cd C:\Projects\dispatcherV4
 dotnet restore .\Dispatcher.sln
 dotnet build .\Dispatcher.sln --no-restore
 dotnet test .\Dispatcher.sln --no-build
+```
+
+## Проверка с локальной PostgreSQL
+
+```powershell
+cd C:\Projects\dispatcherV4
+$env:DISPATCHER_CONNECTION_STRING="Host=localhost;Port=5432;Database=dispatcher;Username=postgres;Password=YOUR_LOCAL_PASSWORD;Include Error Detail=false"
+dotnet tool restore
+dotnet tool run dotnet-ef database update --project .\src\Dispatcher.Infrastructure\Dispatcher.Infrastructure.csproj --startup-project .\src\Dispatcher.Api\Dispatcher.Api.csproj --context DispatcherDbContext
 ```
 
 ## API smoke
@@ -57,7 +67,7 @@ dotnet run --project .\src\Dispatcher.Api\Dispatcher.Api.csproj
 
 ```powershell
 Invoke-WebRequest http://localhost:5076/api/health/live -UseBasicParsing | Select-Object StatusCode,Headers
-Invoke-WebRequest -Headers @{ 'X-Correlation-ID' = 'manual-step-02' } http://localhost:5076/api/health/ready -UseBasicParsing | Select-Object StatusCode,Headers
+try { Invoke-WebRequest http://localhost:5076/api/health/ready -UseBasicParsing | Select-Object StatusCode,Content,Headers } catch { $_.Exception.Response | Select-Object StatusCode,Headers; $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream()); $reader.ReadToEnd(); $reader.Close() }
 ```
 
 ## Важные правила

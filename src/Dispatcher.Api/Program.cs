@@ -1,12 +1,14 @@
+using Dispatcher.Api.Configuration;
 using Dispatcher.Api.Endpoints;
 using Dispatcher.Api.Middleware;
 using Dispatcher.Application;
 using Dispatcher.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
+var dispatcherDatabaseConnectionString = builder.Configuration.GetDispatcherDatabaseConnectionString();
 
 builder.Services.AddDispatcherApplication();
-builder.Services.AddDispatcherInfrastructure();
+builder.Services.AddDispatcherInfrastructure(dispatcherDatabaseConnectionString);
 builder.Services.AddHealthChecks();
 
 var app = builder.Build();

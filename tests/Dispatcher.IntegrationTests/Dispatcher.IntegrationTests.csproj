@@ -5,12 +5,15 @@
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
     <PackageReference Include="xunit" />
     <PackageReference Include="xunit.runner.visualstudio" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Dispatcher.Api\Dispatcher.Api.csproj" />
     <ProjectReference Include="..\..\src\Dispatcher.Contracts\Dispatcher.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\Dispatcher.Infrastructure\Dispatcher.Infrastructure.csproj" />
   </ItemGroup>
 </Project>
