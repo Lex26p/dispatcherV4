@@ -16,8 +16,8 @@
 - Goal: Identity, roles, scopes и shell
 
 ## Current step
-- Step: 5
-- Name: Identity/RBAC baseline
+- Step: 6
+- Name: Web shell baseline
 - Status: Ready for local verification
 - Started: 2026-07-18T00:00:00Z
 - Completed: pending local verification and commit
@@ -32,6 +32,7 @@
 | 3 | 2026-07-18 | 6a9fd8d69a363677d7fabcd7dd54d418f7b2acb7 | Domain primitives completed | Framework-free primitives for identifiers, timestamps, quality, freshness and typed values |
 | 4 | 2026-07-18 | 714cece5c877f3636e5c28af7dc3c6cc991cc01a | PostgreSQL infrastructure completed | EF Core PostgreSQL baseline, empty migration and ready health check added |
 | 4B | 2026-07-18 | local verification only | Local PostgreSQL migration verified | PostgreSQL 17 installed locally; `dispatcher` DB created; baseline migration applied; `/api/health/ready` returned 200; no repository changes |
+| 5 | 2026-07-18 | 0bace21353276794050139abd6f2b423e49c5f5a | Identity/RBAC baseline completed | Development header current user, users/roles/scopes/assignments API, last-admin guard, identity migration and baseline UI routes |
 
 ## Architecture decisions
 | ADR | Decision | Status | Consequences |
@@ -41,12 +42,13 @@
 | Step 3 | Keep domain primitives framework-free and protocol-neutral | Accepted | Domain can be tested without EF Core, ASP.NET Core, SignalR, UI or protocol dependencies |
 | Step 4 | Use PostgreSQL through EF Core baseline migration | Accepted | Later vertical slices add schemas/tables incrementally; no business table is created in Step 4 |
 | Step 5 | Use development header current user until production auth provider is selected | Accepted | Backend permission checks exist now, but production authentication remains a known limitation |
+| Step 6 | Build a componentized Blazor shell before feature-heavy UI | Accepted | Shell uses AppShell, GlobalHeader, NavigationRail, ContextDrawerHost and RouteCatalog; no monolithic app.js copy |
 
 ## Created projects
 | Project | Purpose | Created in step | Build status |
 |---|---|---|---|
 | Dispatcher.Api | ASP.NET Core API composition root, health endpoints, correlation, exception middleware and identity endpoints | 1, 2, 4, 5 | To verify locally |
-| Dispatcher.Web | Blazor WebAssembly shell skeleton and baseline identity/admin routes | 1, 5 | To verify locally |
+| Dispatcher.Web | Blazor WebAssembly shell baseline, route catalog, navigation rail, header, context drawer and baseline identity/admin/settings routes | 1, 5, 6 | To verify locally |
 | Dispatcher.Domain | Domain primitives and identity access entities | 1, 3, 5 | To verify locally |
 | Dispatcher.Application | Application abstractions, current user placeholder, correlation context, permission constants and DI registration | 1, 2, 5 | To verify locally |
 | Dispatcher.Infrastructure | Infrastructure adapters baseline, system clock, EF Core PostgreSQL DbContext and identity mappings | 1, 4, 5 | To verify locally |
@@ -62,13 +64,13 @@
 - Schemas created: `identity_access`
 - Current migration: `20260718001000_AddIdentityAccessBaseline`
 - Clean install verified: baseline migration applied locally on 2026-07-18
-- Upgrade verified: Step 5 migration pending local verification
+- Upgrade verified: Step 5 migration applied locally on 2026-07-18
 
 ## Migrations
 | Migration | Step | Applied locally | Roll-forward tested | Notes |
 |---|---|---|---|---|
 | 20260718000000_BaselineDatabase | 4 | yes | yes | Empty EF Core baseline; creates EF migrations history when applied |
-| 20260718001000_AddIdentityAccessBaseline | 5 | pending | pending | Creates identity schema, users, roles, scopes, role assignments and development admin seed |
+| 20260718001000_AddIdentityAccessBaseline | 5 | yes | yes | Creates identity schema, users, roles, scopes, role assignments and development admin seed |
 
 ## API endpoints
 | Method | Route | Authorization | Implemented in step | Tests |
@@ -77,12 +79,12 @@
 | GET | `/api/health/ready` | Anonymous | 1, PostgreSQL check in 4 | Manual smoke; returned 200 after local PostgreSQL verification |
 | GET | `/` | Anonymous | 1 | Redirects to `/api/health/live`; manual smoke required |
 | GET | `/api/diagnostics/exception` | Development only | 2 | Manual smoke for exception middleware/problem details |
-| GET | `/api/me` | Development current user | 5 | Manual smoke pending |
-| GET | `/api/users` | `identity.users.view` | 5 | Manual smoke pending |
+| GET | `/api/me` | Development current user | 5 | Manual smoke passed before Step 5 commit |
+| GET | `/api/users` | `identity.users.view` | 5 | Manual smoke passed before Step 5 commit |
 | GET | `/api/users/{id}` | `identity.users.view` | 5 | Manual smoke pending |
-| GET | `/api/roles` | `identity.roles.view` | 5 | Manual smoke pending |
-| GET | `/api/permission-scopes` | `identity.scopes.view` | 5 | Manual smoke pending |
-| GET | `/api/role-assignments` | `identity.assignments.view` | 5 | Manual smoke pending |
+| GET | `/api/roles` | `identity.roles.view` | 5 | Manual smoke passed before Step 5 commit |
+| GET | `/api/permission-scopes` | `identity.scopes.view` | 5 | Manual smoke passed before Step 5 commit |
+| GET | `/api/role-assignments` | `identity.assignments.view` | 5 | Manual smoke passed before Step 5 commit |
 | POST | `/api/role-assignments` | `identity.assignments.manage` | 5 | Manual smoke pending |
 | POST | `/api/role-assignments/{id}/revoke` | `identity.assignments.manage` | 5 | Manual smoke pending; last-admin guard included |
 
@@ -90,11 +92,14 @@
 | Route | Status | Authorization UX | Smoke test |
 |---|---|---|---|
 | `/` | Redirects to `/home` | None yet | Manual browser smoke required |
-| `/home` | Implemented skeleton | None yet | Manual browser smoke required |
-| `/me` | Implemented skeleton | Permission-aware UX pending Step 6 | Manual browser smoke required |
-| `/admin/users` | Implemented skeleton | Permission-aware UX pending Step 6 | Manual browser smoke required |
-| `/forbidden` | Implemented skeleton | None | Manual browser smoke required |
-| `/not-found` | Implemented skeleton | None | Manual browser smoke required |
+| `/home` | Shell baseline route | Navigation visible | Manual browser smoke required |
+| `/me` | Shell baseline route | Uses route catalog marker; backend source `/api/me` exists | Manual browser smoke required |
+| `/admin/users` | Shell baseline route | Admin route catalog marker; backend filters remain source of truth | Manual browser smoke required |
+| `/forbidden` | Shell baseline route | Explains UI denial only | Manual browser smoke required |
+| `/not-found` | Shell baseline route | Fallback page | Manual browser smoke required |
+| `/settings` | Shell baseline route | Personal settings placeholder | Manual browser smoke required |
+| `/settings/profile` | Shell baseline route | Profile settings placeholder | Manual browser smoke required |
+| `/admin` | Shell baseline route | Admin landing page | Manual browser smoke required |
 
 ## Workers
 | Worker/job | Host | Schedule/trigger | Health/metrics | Status |
@@ -119,14 +124,14 @@
 
 ## Known limitations
 - Authentication is development-header based only; production provider is not selected yet.
-- Permission-aware navigation is not implemented yet; Step 6 will improve shell behavior.
+- Permission-aware navigation is represented by route catalog markers, but actual menu filtering from `/api/me` is deferred.
 - Audit hooks are documented but not persisted until the audit step.
 - No business tables beyond identity baseline yet.
 - No real telemetry, SignalR, dashboards, alarms or maintenance yet.
 - Step 2 diagnostics exception endpoint is development-only and must not become a business API.
 
 ## Next steps
-1. Step 6 — Web shell baseline.
+1. Step 7 — Locations.
 
 ## Commit hash history
 | Date UTC | Step | Commit hash | Message |
@@ -137,4 +142,8 @@
 | 2026-07-18 | 2 | 19d3f062ffd0e12b43e5213bfa96ea33c0e84a69 | Step 2: Add shared contracts and API correlation |
 | 2026-07-18 | 3 | 6a9fd8d69a363677d7fabcd7dd54d418f7b2acb7 | Step 3: Add domain primitives |
 | 2026-07-18 | 4 | 714cece5c877f3636e5c28af7dc3c6cc991cc01a | Fix Step 4 baseline migration build |
-| 2026-07-18 | 5 | pending | Step 5: Add Identity/RBAC baseline |
+| 2026-07-18 | 5 | 0bace21353276794050139abd6f2b423e49c5f5a | Step 5: Add Identity/RBAC baseline |
+
+## Step 6 local verification notes
+- Web shell baseline files added in Step 6 archive.
+- User noted previous Web skeleton was rough; Step 6 addresses layout baseline, but final UX polish remains iterative.

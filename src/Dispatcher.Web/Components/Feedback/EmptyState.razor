@@ -1,0 +1,26 @@
+<section class="empty-state">
+    <p class="eyebrow">@Eyebrow</p>
+    <h1>@Title</h1>
+    <p>@Message</p>
+    @if (!string.IsNullOrWhiteSpace(LinkHref) && !string.IsNullOrWhiteSpace(LinkLabel))
+    {
+        <NavLink href="@LinkHref" class="button-link">@LinkLabel</NavLink>
+    }
+</section>
+
+@code {
+    [Parameter]
+    public string Eyebrow { get; set; } = "Пусто";
+
+    [Parameter]
+    public string Title { get; set; } = "Нет данных";
+
+    [Parameter]
+    public string Message { get; set; } = "Данные появятся после подключения соответствующего vertical slice.";
+
+    [Parameter]
+    public string? LinkHref { get; set; }
+
+    [Parameter]
+    public string? LinkLabel { get; set; }
+}

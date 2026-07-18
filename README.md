@@ -6,7 +6,7 @@
 
 Репозиторий очищен от учебного кода и переведен на промышленный baseline.
 
-Текущий шаг: **Step 5 — Identity/RBAC baseline**.
+Текущий шаг: **Step 6 — Web shell baseline**.
 
 ## Источники истины
 
@@ -37,6 +37,16 @@
 - optional PostgreSQL integration smoke test
 
 No business tables are created in this step.
+
+
+## Step 6 Web shell baseline
+
+- единая Blazor shell-структура: `AppShell`, `GlobalHeader`, `NavigationRail`, `ContextDrawerHost`;
+- routes `/home`, `/me`, `/settings`, `/settings/profile`, `/admin`, `/admin/users`, `/forbidden`, `/not-found`;
+- route catalog для будущей permission-aware navigation;
+- dark industrial theme tokens;
+- временный контекстный drawer без real telemetry/data quality;
+- без dashboard editor, SVG editor, kiosk, realtime и production auth provider.
 
 ## Проверка без локальной БД
 

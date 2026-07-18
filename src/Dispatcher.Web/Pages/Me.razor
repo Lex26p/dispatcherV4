@@ -2,26 +2,28 @@
 
 <PageTitle>Диспетчер · Мой профиль</PageTitle>
 
-<section class="page-card">
-    <p class="eyebrow">Step 5</p>
-    <h1>Мой профиль</h1>
-    <p>
-        Стартовый экран identity baseline. Реальные данные пользователя доступны через backend endpoint
-        <code>GET /api/me</code>; UI-route создан для последующей привязки к effective permissions.
-    </p>
+<section class="workspace-page narrow-page">
+    <div class="page-heading">
+        <p class="eyebrow">Пользователь</p>
+        <h1>Мой профиль</h1>
+        <p>Route подготовлен для отображения effective permissions. Пока источник backend уже существует как <code>GET /api/me</code>, а UI показывает shell-ready состояние.</p>
+    </div>
 
-    <dl class="status-grid">
-        <div>
-            <dt>Auth baseline</dt>
-            <dd>Development header user</dd>
-        </div>
-        <div>
-            <dt>Backend source</dt>
-            <dd>/api/me</dd>
-        </div>
-        <div>
-            <dt>Следующий UI шаг</dt>
-            <dd>Shell permissions</dd>
-        </div>
-    </dl>
+    <section class="content-panel">
+        <h2>Baseline identity</h2>
+        <dl class="definition-grid">
+            <div>
+                <dt>Authentication</dt>
+                <dd>development header current user</dd>
+            </div>
+            <div>
+                <dt>Authorization</dt>
+                <dd>backend permission filters</dd>
+            </div>
+            <div>
+                <dt>Следующий hardening</dt>
+                <dd>production auth provider позже отдельным решением</dd>
+            </div>
+        </dl>
+    </section>
 </section>

@@ -2,11 +2,4 @@
 
 <PageTitle>Диспетчер · Нет доступа</PageTitle>
 
-<section class="page-card">
-    <p class="eyebrow">403</p>
-    <h1>Нет доступа</h1>
-    <p>
-        UI-route для запрещенных переходов. Это не источник безопасности: каждый backend endpoint
-        обязан повторно проверять разрешение и scope.
-    </p>
-</section>
+<EmptyState Eyebrow="403" Title="Нет доступа" Message="Этот экран объясняет отказ в UI, но безопасность всегда проверяется на backend endpoint или hub subscription." LinkHref="/home" LinkLabel="На рабочий стол" />

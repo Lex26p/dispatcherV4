@@ -2,26 +2,60 @@
 
 <PageTitle>Диспетчер · Рабочий стол</PageTitle>
 
-<section class="page-card">
-    <p class="eyebrow">Step 1</p>
-    <h1>Рабочий стол</h1>
-    <p>
-        Минимальная Blazor-оболочка промышленного проекта. На следующих шагах сюда будет подключаться
-        авторизация, контекст локации, карточки внимания и реальные данные.
-    </p>
+<section class="workspace-page">
+    <div class="page-heading">
+        <p class="eyebrow">Step 6</p>
+        <h1>Рабочий стол</h1>
+        <p>Базовая оболочка готова: один header, левый rail, рабочая область и правый контекстный drawer. Реальные локации, оборудование и значения появятся следующими vertical slices.</p>
+    </div>
 
-    <dl class="status-grid">
-        <div>
-            <dt>Состояние</dt>
-            <dd>Solution skeleton</dd>
+    <div class="summary-grid" aria-label="Состояние платформы">
+        <article class="metric-card">
+            <span>Текущий этап</span>
+            <strong>Foundation</strong>
+            <small>Steps 0–6</small>
+        </article>
+        <article class="metric-card">
+            <span>Backend</span>
+            <strong>API + RBAC</strong>
+            <small>health, correlation, identity</small>
+        </article>
+        <article class="metric-card">
+            <span>Database</span>
+            <strong>PostgreSQL</strong>
+            <small>baseline + identity schema</small>
+        </article>
+        <article class="metric-card">
+            <span>Web shell</span>
+            <strong>Ready</strong>
+            <small>navigation + layout</small>
+        </article>
+    </div>
+
+    <section class="content-panel">
+        <h2>Ближайшая разработка</h2>
+        <div class="timeline-list">
+            <div>
+                <span class="step-badge">7</span>
+                <div>
+                    <strong>Locations</strong>
+                    <p>Первый полноценный vertical slice от PostgreSQL до UI.</p>
+                </div>
+            </div>
+            <div>
+                <span class="step-badge">8</span>
+                <div>
+                    <strong>Equipment</strong>
+                    <p>Канонический реестр оборудования без протокольных полей.</p>
+                </div>
+            </div>
+            <div>
+                <span class="step-badge">9</span>
+                <div>
+                    <strong>DataPoints and TelemetrySource</strong>
+                    <p>Protocol-neutral конфигурация телеметрии и masked source settings.</p>
+                </div>
+            </div>
         </div>
-        <div>
-            <dt>Runtime</dt>
-            <dd>Blazor WebAssembly</dd>
-        </div>
-        <div>
-            <dt>Backend</dt>
-            <dd>ASP.NET Core API</dd>
-        </div>
-    </dl>
+    </section>
 </section>

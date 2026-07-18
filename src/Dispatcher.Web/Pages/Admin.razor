@@ -1,0 +1,23 @@
+@page "/admin"
+@using Dispatcher.Web.Navigation
+
+<PageTitle>Диспетчер · Администрирование</PageTitle>
+
+<section class="workspace-page">
+    <div class="page-heading">
+        <p class="eyebrow">Администрирование</p>
+        <h1>Панель администратора</h1>
+        <p>Стартовая административная зона. Сейчас доступен Identity/RBAC baseline; health, audit и data quality будут добавлены позже отдельными шагами.</p>
+    </div>
+
+    <div class="action-grid">
+        @foreach (var route in RouteCatalog.AdminRoutes)
+        {
+            <NavLink href="@route.Href" class="route-card">
+                <span>@route.Area</span>
+                <strong>@route.Label</strong>
+                <small>permission: @route.RequiredPermission</small>
+            </NavLink>
+        }
+    </div>
+</section>

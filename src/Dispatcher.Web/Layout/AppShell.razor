@@ -1,0 +1,18 @@
+<div class="app-shell">
+    <GlobalHeader />
+
+    <div class="body-shell">
+        <NavigationRail />
+
+        <main id="workspace" class="workspace" tabindex="-1">
+            @ChildContent
+        </main>
+
+        <ContextDrawerHost />
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}

@@ -2,26 +2,40 @@
 
 <PageTitle>Диспетчер · Пользователи</PageTitle>
 
-<section class="page-card">
-    <p class="eyebrow">Admin</p>
-    <h1>Пользователи и роли</h1>
-    <p>
-        Стартовый admin-route для Step 5. Backend уже предоставляет users, roles, permission scopes
-        и role assignments; полноценная таблица управления появится после shell/RBAC UX hardening.
-    </p>
+<section class="workspace-page">
+    <div class="page-heading">
+        <p class="eyebrow">Identity/RBAC</p>
+        <h1>Пользователи и роли</h1>
+        <p>Backend endpoints уже созданы. Полноценная таблица управления, audit trail и production auth provider появятся позже; сейчас route закрепляет административный контур shell.</p>
+    </div>
 
-    <dl class="status-grid">
-        <div>
-            <dt>Users API</dt>
-            <dd>/api/users</dd>
-        </div>
-        <div>
-            <dt>Roles API</dt>
-            <dd>/api/roles</dd>
-        </div>
-        <div>
-            <dt>Scopes API</dt>
-            <dd>/api/permission-scopes</dd>
-        </div>
-    </dl>
+    <section class="content-panel">
+        <h2>Доступные API</h2>
+        <dl class="definition-grid three-columns">
+            <div>
+                <dt>Users</dt>
+                <dd>/api/users</dd>
+            </div>
+            <div>
+                <dt>Roles</dt>
+                <dd>/api/roles</dd>
+            </div>
+            <div>
+                <dt>Scopes</dt>
+                <dd>/api/permission-scopes</dd>
+            </div>
+            <div>
+                <dt>Assignments</dt>
+                <dd>/api/role-assignments</dd>
+            </div>
+            <div>
+                <dt>Guard</dt>
+                <dd>last admin protected</dd>
+            </div>
+            <div>
+                <dt>Security</dt>
+                <dd>backend filters</dd>
+            </div>
+        </dl>
+    </section>
 </section>

@@ -1,0 +1,25 @@
+@using Dispatcher.Web.Navigation
+
+<nav class="navigation-rail" aria-label="Основная навигация">
+    @foreach (var route in RouteCatalog.PrimaryRoutes)
+    {
+        <NavLink class="nav-item" href="@route.Href" Match="@GetMatch(route.Href)" title="@GetTitle(route)">
+            <span class="nav-short">@route.ShortLabel</span>
+            <span class="nav-label">@route.Label</span>
+        </NavLink>
+    }
+</nav>
+
+@code {
+    private static NavLinkMatch GetMatch(string href)
+    {
+        return string.Equals(href, "/home", StringComparison.OrdinalIgnoreCase)
+            ? NavLinkMatch.All
+            : NavLinkMatch.Prefix;
+    }
+
+    private static string GetTitle(AppRoute route)
+    {
+        return $"{route.Label} · {route.Area}";
+    }
+}
