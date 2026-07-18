@@ -1,5 +1,6 @@
 using Dispatcher.Api.Configuration;
 using Dispatcher.Api.Endpoints;
+using Dispatcher.Api.Endpoints.Equipment;
 using Dispatcher.Api.Endpoints.Locations;
 using Dispatcher.Api.Middleware;
 using Dispatcher.Api.Security;
@@ -45,6 +46,7 @@ app.MapGet("/", () => Results.Redirect("/api/health/live"));
 app.MapHealthEndpoints();
 app.MapIdentityEndpoints();
 app.MapLocationEndpoints();
+app.MapEquipmentEndpoints();
 
 if (app.Environment.IsDevelopment())
 {

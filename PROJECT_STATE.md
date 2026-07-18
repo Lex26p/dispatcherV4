@@ -16,8 +16,8 @@
 - Goal: Locations and baseline asset model
 
 ## Current step
-- Step: 8A
-- Name: Equipment domain and persistence
+- Step: 8B
+- Name: Equipment API and application layer
 - Status: Ready for local verification
 - Started: 2026-07-18T00:00:00Z
 - Completed: pending local verification and commit
@@ -76,7 +76,7 @@
 | 20260718000000_BaselineDatabase | 4 | yes | yes | Empty EF Core baseline; creates EF migrations history when applied |
 | 20260718001000_AddIdentityAccessBaseline | 5 | yes | yes | Creates identity schema, users, roles, scopes, role assignments and development admin seed |
 | 20260718002000_AddLocationsBaseline | 7A | yes | yes | Creates `assets.locations`; API added in 7B; Web UI added in 7C |
-| 20260718003000_AddEquipmentBaseline | 8A | pending | pending | Creates `assets.equipment`; API and Web UI deferred to 8B/8C |
+| 20260718003000_AddEquipmentBaseline | 8A | yes | yes | Creates `assets.equipment`; API added in 8B; Web UI deferred to 8C |
 
 ## API endpoints
 | Method | Route | Authorization | Implemented in step | Tests |
@@ -97,6 +97,13 @@
 | PUT | `/api/locations/{id}` | `locations.manage` | 7B | Manual smoke passed before Step 7B commit |
 | POST | `/api/locations/{id}/move` | `locations.manage` | 7B | Manual smoke pending |
 | POST | `/api/locations/{id}/archive` | `locations.manage` | 7B | Manual smoke pending |
+| GET | `/api/equipment` | `equipment.view` | 8B | Manual smoke pending |
+| GET | `/api/equipment/{id}` | `equipment.view` | 8B | Manual smoke pending |
+| POST | `/api/equipment` | `equipment.manage` | 8B | Manual smoke pending |
+| PUT | `/api/equipment/{id}` | `equipment.manage` | 8B | Manual smoke pending |
+| POST | `/api/equipment/{id}/move` | `equipment.manage` | 8B | Manual smoke pending |
+| POST | `/api/equipment/{id}/archive` | `equipment.manage` | 8B | Manual smoke pending |
+| POST | `/api/equipment/{id}/restore` | `equipment.manage` | 8B | Manual smoke pending |
 | POST | `/api/role-assignments` | `identity.assignments.manage` | 5 | Manual smoke pending |
 | POST | `/api/role-assignments/{id}/revoke` | `identity.assignments.manage` | 5 | Manual smoke pending; last-admin guard included |
 
@@ -145,9 +152,9 @@
 - Step 2 diagnostics exception endpoint is development-only and must not become a business API.
 
 ## Next steps
-1. Step 8A — Equipment domain and persistence.
-2. Step 8B — Equipment API.
-3. Step 8C — Equipment Web UI.
+1. Step 8B — Equipment API.
+2. Step 8C — Equipment Web UI.
+3. Step 9A — DataPoint and TelemetrySource domain/persistence.
 
 ## Commit hash history
 | Date UTC | Step | Commit hash | Message |
@@ -162,6 +169,8 @@
 | 2026-07-18 | 6 | c65226779cce0f4eb71d81064fd2e70bd38bcb7d | Step 6: Add Web shell baseline |
 | 2026-07-18 | 7A | 86aad3e8386c783646064624f82519b1b5e43611 | Step 7A: Add Locations domain and persistence |
 | 2026-07-18 | 7B | 2856caead2cda37b723c018e2b88242622063377 | Step 7B: Add Locations API |
+| 2026-07-18 | 7C | b4a4c6db086bb664024bde33238184f27ee59603 | Step 7C: Add Locations Web UI |
+| 2026-07-18 | 8A | 3bc727ce2325cecaefd7d582f2b8d956a06204b8 | Step 8A: Add Equipment domain and persistence |
 
 ## Step 7A local verification notes
 - This is an intentionally smaller substep.
@@ -185,8 +194,15 @@
 
 ## Step 8A — Equipment domain and persistence
 
-- Status: In progress until local build/test/migration/commit.
-- Previous step hash: b4a4c6db086bb664024bde33238184f27ee59603.
+- Status: Completed.
+- Commit: 3bc727ce2325cecaefd7d582f2b8d956a06204b8.
 - Adds canonical `Equipment` domain entity and `assets.equipment` persistence.
-- Equipment API and Web UI are deferred to Step 8B and Step 8C.
+- Protocol configuration remains out of Equipment.
+
+## Step 8B — Equipment API
+
+- Status: In progress until local build/test/API smoke/commit.
+- Previous step hash: 3bc727ce2325cecaefd7d582f2b8d956a06204b8.
+- Adds Equipment contracts, application service, EF repository, permissions and REST endpoints.
+- Web UI remains deferred to Step 8C.
 - Protocol configuration remains out of Equipment.

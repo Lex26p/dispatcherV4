@@ -1,57 +1,29 @@
 # Диспетчер
 
-Промышленная платформа диспетчеризации, эксплуатации, событий, инцидентов и ТОиР.
+Industrial Dispatcher baseline repository.
 
-## Текущий статус
+## Current development state
 
-Текущий шаг: **Step 7A — Locations domain and persistence**.
+- Current small step: Step 8B — Equipment API.
+- Last completed step: Step 8A — Equipment domain and persistence.
+- Last completed commit: `3bc727ce2325cecaefd7d582f2b8d956a06204b8`.
 
-Этот шаг намеренно малый: он добавляет только доменную модель `Location`, EF Core mapping, migration `assets.locations` и тесты. API и UI для Locations будут отдельными шагами.
-
-## Источники истины
-
-- `DISPATCHER_TECHNICAL_SPECIFICATION_AND_ROADMAP.md` — master-ТЗ и roadmap.
-- `DISPATCHER_AI_IMPLEMENTATION_SPEC.md` — AI-focused execution guide.
-- `PROJECT_STATE.md` — текущее состояние репозитория и следующий шаг.
-
-## Проверка
+## Local checks
 
 ```powershell
-cd C:\Projects\dispatcherV4
 dotnet restore .\Dispatcher.sln
 dotnet build .\Dispatcher.sln --no-restore
 dotnet test .\Dispatcher.sln --no-build
 ```
 
-## Применение миграции
+## Database
+
+PostgreSQL connection for local development:
 
 ```powershell
-cd C:\Projects\dispatcherV4
 $env:DISPATCHER_CONNECTION_STRING="Host=localhost;Port=5432;Database=dispatcher;Username=postgres;Password=postgres;Include Error Detail=false"
-dotnet tool restore
-dotnet tool run dotnet-ef database update --project .\src\Dispatcher.Infrastructure\Dispatcher.Infrastructure.csproj --startup-project .\src\Dispatcher.Api\Dispatcher.Api.csproj --context DispatcherDbContext
 ```
 
-## Важные правила
+## Step 8B scope
 
-- Не начинать C++ до production/load-test metrics.
-- Не создавать все будущие проекты solution заранее.
-- Не смешивать Location с Equipment или protocol endpoint.
-- Не добавлять API/UI в Step 7A.
-- После каждого шага обновлять `PROJECT_STATE.md`.
-
-## Current implementation status
-
-- Step 7B: Locations API/application layer added. Web UI for Locations is deferred to Step 7C.
-
-
-## Current implementation step
-
-Current small-step flow:
-
-- Step 7A — Locations domain and persistence: completed
-- Step 7B — Locations API: completed
-- Step 7C — Locations Web UI: completed
-- Step 8A — Equipment domain and persistence: ready for local verification
-
-Equipment is intentionally protocol-neutral. Modbus/SNMP/OPC UA/BACnet details must be introduced later through TelemetrySource, DataPoint and protocol mappings, not through the Equipment entity.
+Step 8B adds REST API for canonical Equipment. Equipment remains an asset registry entity only: no protocol addresses, telemetry points, Modbus, SNMP, commands, maintenance, current values or history are introduced in this step.

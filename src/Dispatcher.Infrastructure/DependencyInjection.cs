@@ -1,4 +1,5 @@
 using Dispatcher.Application.Abstractions;
+using Dispatcher.Application.Assets.Equipment;
 using Dispatcher.Application.Assets.Locations;
 using Dispatcher.Infrastructure.Assets;
 using Dispatcher.Infrastructure.Persistence;
@@ -17,6 +18,7 @@ public static class DependencyInjection
         services.AddSingleton<IClock, SystemClock>();
         services.AddDbContext<DispatcherDbContext>(options => options.UseNpgsql(dispatcherDatabaseConnectionString));
         services.AddScoped<ILocationRepository, EfLocationRepository>();
+        services.AddScoped<IEquipmentRepository, EfEquipmentRepository>();
 
         return services;
     }

@@ -16,6 +16,9 @@ public static class PermissionNames
     public const string LocationsView = "locations.view";
     public const string LocationsManage = "locations.manage";
 
+    public const string EquipmentView = "equipment.view";
+    public const string EquipmentManage = "equipment.manage";
+
     public static IReadOnlyList<string> All { get; } =
     [
         IdentityMeView,
@@ -28,5 +31,7 @@ public static class PermissionNames
         IdentityAssignmentsManage,
         LocationsView,
         LocationsManage,
+        EquipmentView,
+        EquipmentManage,
     ];
 }
