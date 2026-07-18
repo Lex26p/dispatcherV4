@@ -25,6 +25,10 @@ public sealed class DispatcherDbContext(DbContextOptions<DispatcherDbContext> op
 
     public DbSet<ProtocolMapping> ProtocolMappings => Set<ProtocolMapping>();
 
+    public DbSet<CurrentValue> CurrentValues => Set<CurrentValue>();
+
+    public DbSet<HistoricalValue> HistoricalValues => Set<HistoricalValue>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema(SchemaNames.Public);

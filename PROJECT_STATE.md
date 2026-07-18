@@ -5,9 +5,9 @@
 - Status: In progress
 
 ## Current step
-- Step: 9C
-- Name: Telemetry configuration Web UI
-- Status: Completed after local build/test/Web smoke and commit
+- Step: 10A
+- Name: Current values domain and persistence
+- Status: Ready to apply
 
 ## Recently completed steps
 - Step 7A: Locations domain and persistence — 86aad3e8386c783646064624f82519b1b5e43611
@@ -18,33 +18,28 @@
 - Step 8C: Equipment Web UI — 0469e0bf5d369bb2f8dc42a7c8748affe654410c
 - Step 9A: Telemetry domain and persistence — 452138affb73a8bae043eae360bb3de36b7ec791
 - Step 9B: Telemetry configuration API — 1d36e46856818e36d9a256d1256a3e9085fd3602
+- Step 9C: Telemetry configuration Web UI — 9ae0fbfb40e82fb624995ad86a13485f9ecdfc31
 
-## Frontend routes added in Step 9C
-- /telemetry/configuration
+## Added in Step 10A
+- Domain: `CurrentValue`, `HistoricalValue`.
+- Persistence: `telemetry.current_values`, `telemetry.historical_values`.
+- Migration: `20260718005000_AddCurrentValuesBaseline`.
+- Tests: current sequence guard, historical sample shape, EF model smoke.
 
-## Web client methods added in Step 9C
-- GetTelemetrySourcesAsync
-- CreateTelemetrySourceAsync
-- EnableTelemetrySourceAsync
-- DisableTelemetrySourceAsync
-- ArchiveTelemetrySourceAsync
-- RestoreTelemetrySourceAsync
-- GetDataPointsAsync
-- CreateDataPointAsync
-- ArchiveDataPointAsync
-- RestoreDataPointAsync
-- GetProtocolMappingsAsync
-- CreateProtocolMappingAsync
-- ArchiveProtocolMappingAsync
-- RestoreProtocolMappingAsync
+## Invariants
+- SignalR is not a source of truth.
+- One current row per DataPoint.
+- Current sample update requires a strictly newer sequence.
+- Historical samples are append-oriented and deduplicated by `(data_point_id, sequence)`.
+- Value records include value kind, raw value, unit, quality, source timestamp, receive timestamp and source id.
 
 ## Known limitations
-- UI is still baseline/operator-admin utility, not final design.
-- No current values or history display yet.
-- No polling worker uses telemetry configuration yet.
-- Protocol-specific authoring forms are deferred; JSON fields are temporary admin-oriented input.
-- Use ASCII unit values such as C/bar/%/V/A until encoding validation is hardened.
+- No current values REST API yet.
+- No history query API yet.
+- No SignalR realtime delivery yet.
+- No polling worker writes values yet.
+- No freshness worker yet.
 
 ## Next steps
-1. Step 10A — Current values domain and persistence.
-2. Step 10B — Current values API.
+1. Step 10B — Current values write/read application service and API.
+2. Step 10C — Current values Web read-only view.

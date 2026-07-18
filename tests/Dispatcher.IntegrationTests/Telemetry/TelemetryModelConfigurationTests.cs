@@ -19,6 +19,8 @@ public sealed class TelemetryModelConfigurationTests
         var source = model.FindEntityType(typeof(TelemetrySource));
         var point = model.FindEntityType(typeof(DataPoint));
         var mapping = model.FindEntityType(typeof(ProtocolMapping));
+        var currentValue = model.FindEntityType(typeof(CurrentValue));
+        var historicalValue = model.FindEntityType(typeof(HistoricalValue));
 
         Assert.NotNull(source);
         Assert.NotNull(point);
@@ -29,5 +31,11 @@ public sealed class TelemetryModelConfigurationTests
         Assert.Equal("data_points", point.GetTableName());
         Assert.Equal(SchemaNames.Telemetry, mapping!.GetSchema());
         Assert.Equal("protocol_mappings", mapping.GetTableName());
+        Assert.NotNull(currentValue);
+        Assert.NotNull(historicalValue);
+        Assert.Equal(SchemaNames.Telemetry, currentValue!.GetSchema());
+        Assert.Equal("current_values", currentValue.GetTableName());
+        Assert.Equal(SchemaNames.Telemetry, historicalValue!.GetSchema());
+        Assert.Equal("historical_values", historicalValue.GetTableName());
     }
 }
