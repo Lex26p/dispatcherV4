@@ -2,6 +2,7 @@ using Dispatcher.Api.Configuration;
 using Dispatcher.Api.Endpoints;
 using Dispatcher.Api.Endpoints.Equipment;
 using Dispatcher.Api.Endpoints.Locations;
+using Dispatcher.Api.Endpoints.Telemetry;
 using Dispatcher.Api.Middleware;
 using Dispatcher.Api.Security;
 using Dispatcher.Application;
@@ -47,6 +48,7 @@ app.MapHealthEndpoints();
 app.MapIdentityEndpoints();
 app.MapLocationEndpoints();
 app.MapEquipmentEndpoints();
+app.MapTelemetryConfigurationEndpoints();
 
 if (app.Environment.IsDevelopment())
 {

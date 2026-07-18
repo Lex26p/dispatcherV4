@@ -1,8 +1,10 @@
 using Dispatcher.Application.Abstractions;
 using Dispatcher.Application.Assets.Equipment;
 using Dispatcher.Application.Assets.Locations;
+using Dispatcher.Application.Telemetry.Configuration;
 using Dispatcher.Infrastructure.Assets;
 using Dispatcher.Infrastructure.Persistence;
+using Dispatcher.Infrastructure.Telemetry;
 using Dispatcher.Infrastructure.Time;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,6 +21,7 @@ public static class DependencyInjection
         services.AddDbContext<DispatcherDbContext>(options => options.UseNpgsql(dispatcherDatabaseConnectionString));
         services.AddScoped<ILocationRepository, EfLocationRepository>();
         services.AddScoped<IEquipmentRepository, EfEquipmentRepository>();
+        services.AddScoped<ITelemetryConfigurationRepository, EfTelemetryConfigurationRepository>();
 
         return services;
     }
