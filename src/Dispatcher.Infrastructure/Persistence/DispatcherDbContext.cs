@@ -1,3 +1,4 @@
+using Dispatcher.Domain.Assets;
 using Dispatcher.Domain.IdentityAccess;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,6 +13,8 @@ public sealed class DispatcherDbContext(DbContextOptions<DispatcherDbContext> op
     public DbSet<PermissionScope> PermissionScopes => Set<PermissionScope>();
 
     public DbSet<RoleAssignment> RoleAssignments => Set<RoleAssignment>();
+
+    public DbSet<Location> Locations => Set<Location>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

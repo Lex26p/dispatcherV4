@@ -12,12 +12,12 @@
 - Status: In progress
 
 ## Current sprint
-- Sprint: 2
-- Goal: Identity, roles, scopes и shell
+- Sprint: 3
+- Goal: Locations and baseline asset model
 
 ## Current step
-- Step: 6
-- Name: Web shell baseline
+- Step: 7A
+- Name: Locations domain and persistence
 - Status: Ready for local verification
 - Started: 2026-07-18T00:00:00Z
 - Completed: pending local verification and commit
@@ -33,6 +33,7 @@
 | 4 | 2026-07-18 | 714cece5c877f3636e5c28af7dc3c6cc991cc01a | PostgreSQL infrastructure completed | EF Core PostgreSQL baseline, empty migration and ready health check added |
 | 4B | 2026-07-18 | local verification only | Local PostgreSQL migration verified | PostgreSQL 17 installed locally; `dispatcher` DB created; baseline migration applied; `/api/health/ready` returned 200; no repository changes |
 | 5 | 2026-07-18 | 0bace21353276794050139abd6f2b423e49c5f5a | Identity/RBAC baseline completed | Development header current user, users/roles/scopes/assignments API, last-admin guard, identity migration and baseline UI routes |
+| 6 | 2026-07-18 | c65226779cce0f4eb71d81064fd2e70bd38bcb7d | Web shell baseline completed | AppShell, GlobalHeader, NavigationRail, ContextDrawerHost, route catalog and baseline industrial theme added |
 
 ## Architecture decisions
 | ADR | Decision | Status | Consequences |
@@ -43,15 +44,16 @@
 | Step 4 | Use PostgreSQL through EF Core baseline migration | Accepted | Later vertical slices add schemas/tables incrementally; no business table is created in Step 4 |
 | Step 5 | Use development header current user until production auth provider is selected | Accepted | Backend permission checks exist now, but production authentication remains a known limitation |
 | Step 6 | Build a componentized Blazor shell before feature-heavy UI | Accepted | Shell uses AppShell, GlobalHeader, NavigationRail, ContextDrawerHost and RouteCatalog; no monolithic app.js copy |
+| Step 7A | Split Locations into smaller backend-first substeps | Accepted | Location domain and persistence are implemented before API and UI to reduce change size |
 
 ## Created projects
 | Project | Purpose | Created in step | Build status |
 |---|---|---|---|
 | Dispatcher.Api | ASP.NET Core API composition root, health endpoints, correlation, exception middleware and identity endpoints | 1, 2, 4, 5 | To verify locally |
 | Dispatcher.Web | Blazor WebAssembly shell baseline, route catalog, navigation rail, header, context drawer and baseline identity/admin/settings routes | 1, 5, 6 | To verify locally |
-| Dispatcher.Domain | Domain primitives and identity access entities | 1, 3, 5 | To verify locally |
+| Dispatcher.Domain | Domain primitives, identity access entities and Location domain entity | 1, 3, 5, 7A | To verify locally |
 | Dispatcher.Application | Application abstractions, current user placeholder, correlation context, permission constants and DI registration | 1, 2, 5 | To verify locally |
-| Dispatcher.Infrastructure | Infrastructure adapters baseline, system clock, EF Core PostgreSQL DbContext and identity mappings | 1, 4, 5 | To verify locally |
+| Dispatcher.Infrastructure | Infrastructure adapters baseline, system clock, EF Core PostgreSQL DbContext, identity mappings and Location persistence | 1, 4, 5, 7A | To verify locally |
 | Dispatcher.Contracts | Public REST/SignalR contracts, problem details, paging, correlation, readiness and identity contracts | 1, 2, 4, 5 | To verify locally |
 | Dispatcher.Telemetry.Worker | Future telemetry runtime host skeleton | 1 | To verify locally |
 | Dispatcher.Workers | Future background jobs host skeleton | 1 | To verify locally |
@@ -61,8 +63,8 @@
 ## Database status
 - Provider: PostgreSQL 17 locally; EF Core via `Npgsql.EntityFrameworkCore.PostgreSQL`
 - Connection method: `ConnectionStrings:DispatcherDatabase` or `DISPATCHER_CONNECTION_STRING`
-- Schemas created: `identity_access`
-- Current migration: `20260718001000_AddIdentityAccessBaseline`
+- Schemas created: `identity_access`, `assets` after Step 7A migration
+- Current migration: `20260718002000_AddLocationsBaseline` after Step 7A migration
 - Clean install verified: baseline migration applied locally on 2026-07-18
 - Upgrade verified: Step 5 migration applied locally on 2026-07-18
 
@@ -71,6 +73,7 @@
 |---|---|---|---|---|
 | 20260718000000_BaselineDatabase | 4 | yes | yes | Empty EF Core baseline; creates EF migrations history when applied |
 | 20260718001000_AddIdentityAccessBaseline | 5 | yes | yes | Creates identity schema, users, roles, scopes, role assignments and development admin seed |
+| 20260718002000_AddLocationsBaseline | 7A | pending | pending | Creates `assets.locations`; no API/UI yet |
 
 ## API endpoints
 | Method | Route | Authorization | Implemented in step | Tests |
@@ -121,17 +124,18 @@
 | Role | Dispatcher.Domain.IdentityAccess | Role with normalized machine permissions | 5 |
 | PermissionScope | Dispatcher.Domain.IdentityAccess | Scope boundary for assignments | 5 |
 | RoleAssignment | Dispatcher.Domain.IdentityAccess | Grant/revoke lifecycle with reason and last-admin guard at API layer | 5 |
+| Location | Dispatcher.Domain.Assets | Physical/organizational hierarchy node with parent, code, name, archive state and timestamps | 7A |
 
 ## Known limitations
 - Authentication is development-header based only; production provider is not selected yet.
 - Permission-aware navigation is represented by route catalog markers, but actual menu filtering from `/api/me` is deferred.
 - Audit hooks are documented but not persisted until the audit step.
-- No business tables beyond identity baseline yet.
+- No public assets API yet; Step 7A only adds Location domain and persistence.
 - No real telemetry, SignalR, dashboards, alarms or maintenance yet.
 - Step 2 diagnostics exception endpoint is development-only and must not become a business API.
 
 ## Next steps
-1. Step 7 — Locations.
+1. Step 7B — Locations API.
 
 ## Commit hash history
 | Date UTC | Step | Commit hash | Message |
@@ -143,7 +147,9 @@
 | 2026-07-18 | 3 | 6a9fd8d69a363677d7fabcd7dd54d418f7b2acb7 | Step 3: Add domain primitives |
 | 2026-07-18 | 4 | 714cece5c877f3636e5c28af7dc3c6cc991cc01a | Fix Step 4 baseline migration build |
 | 2026-07-18 | 5 | 0bace21353276794050139abd6f2b423e49c5f5a | Step 5: Add Identity/RBAC baseline |
+| 2026-07-18 | 6 | c65226779cce0f4eb71d81064fd2e70bd38bcb7d | Step 6: Add Web shell baseline |
 
-## Step 6 local verification notes
-- Web shell baseline files added in Step 6 archive.
-- User noted previous Web skeleton was rough; Step 6 addresses layout baseline, but final UX polish remains iterative.
+## Step 7A local verification notes
+- This is an intentionally smaller substep.
+- Adds only Location domain/persistence/migration/tests.
+- Locations API and UI are deferred to Step 7B and Step 7C.
