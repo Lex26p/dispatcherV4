@@ -5,9 +5,9 @@
 - Status: In progress
 
 ## Current step
-- Step: 9B
-- Name: Telemetry configuration API
-- Status: Completed after local build/test/API smoke and commit
+- Step: 9C
+- Name: Telemetry configuration Web UI
+- Status: Completed after local build/test/Web smoke and commit
 
 ## Recently completed steps
 - Step 7A: Locations domain and persistence — 86aad3e8386c783646064624f82519b1b5e43611
@@ -17,35 +17,34 @@
 - Step 8B: Equipment API — ab70ec72a6e81eea218447189411eaf204ce03ab
 - Step 8C: Equipment Web UI — 0469e0bf5d369bb2f8dc42a7c8748affe654410c
 - Step 9A: Telemetry domain and persistence — 452138affb73a8bae043eae360bb3de36b7ec791
+- Step 9B: Telemetry configuration API — 1d36e46856818e36d9a256d1256a3e9085fd3602
 
-## API endpoints added in Step 9B
-- GET /api/telemetry-sources
-- GET /api/telemetry-sources/{id}
-- POST /api/telemetry-sources
-- PUT /api/telemetry-sources/{id}
-- POST /api/telemetry-sources/{id}/enable
-- POST /api/telemetry-sources/{id}/disable
-- POST /api/telemetry-sources/{id}/archive
-- POST /api/telemetry-sources/{id}/restore
-- GET /api/data-points
-- GET /api/data-points/{id}
-- POST /api/data-points
-- PUT /api/data-points/{id}
-- POST /api/data-points/{id}/archive
-- POST /api/data-points/{id}/restore
-- GET /api/protocol-mappings
-- GET /api/protocol-mappings/{id}
-- POST /api/protocol-mappings
-- PUT /api/protocol-mappings/{id}
-- POST /api/protocol-mappings/{id}/archive
-- POST /api/protocol-mappings/{id}/restore
+## Frontend routes added in Step 9C
+- /telemetry/configuration
+
+## Web client methods added in Step 9C
+- GetTelemetrySourcesAsync
+- CreateTelemetrySourceAsync
+- EnableTelemetrySourceAsync
+- DisableTelemetrySourceAsync
+- ArchiveTelemetrySourceAsync
+- RestoreTelemetrySourceAsync
+- GetDataPointsAsync
+- CreateDataPointAsync
+- ArchiveDataPointAsync
+- RestoreDataPointAsync
+- GetProtocolMappingsAsync
+- CreateProtocolMappingAsync
+- ArchiveProtocolMappingAsync
+- RestoreProtocolMappingAsync
 
 ## Known limitations
-- No Web UI for telemetry configuration yet.
-- No current values/history ingestion yet.
-- No polling worker uses these configuration records yet.
-- No real Modbus/SNMP transport calls in this step.
+- UI is still baseline/operator-admin utility, not final design.
+- No current values or history display yet.
+- No polling worker uses telemetry configuration yet.
+- Protocol-specific authoring forms are deferred; JSON fields are temporary admin-oriented input.
+- Use ASCII unit values such as C/bar/%/V/A until encoding validation is hardened.
 
 ## Next steps
-1. Step 9C — Telemetry configuration Web UI.
-2. Step 10A — Current values domain and persistence.
+1. Step 10A — Current values domain and persistence.
+2. Step 10B — Current values API.

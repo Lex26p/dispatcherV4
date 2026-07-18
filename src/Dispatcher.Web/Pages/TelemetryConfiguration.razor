@@ -1,0 +1,676 @@
+@page "/telemetry/configuration"
+@using Dispatcher.Contracts.Assets
+@using Dispatcher.Contracts.Telemetry
+@inject DispatcherApiClient Api
+
+<PageTitle>Диспетчер · Телеметрия</PageTitle>
+
+<section class="workspace-page telemetry-page">
+    <div class="page-heading split-heading">
+        <div>
+            <p class="eyebrow">Telemetry Configuration</p>
+            <h1>Конфигурация телеметрии</h1>
+            <p>Protocol-neutral настройка источников, DataPoint и mapping. Оборудование остается без Modbus/SNMP/OID/register-полей.</p>
+        </div>
+        <div class="page-actions">
+            <button type="button" class="secondary-button" @onclick="ReloadAsync" disabled="@isBusy">Обновить</button>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(errorMessage))
+    {
+        <section class="alert-panel danger" role="alert">
+            <strong>Ошибка</strong>
+            <span>@errorMessage</span>
+        </section>
+    }
+
+    <section class="content-panel">
+        <div class="panel-heading-row">
+            <div>
+                <h2>Создать источник телеметрии</h2>
+                <p>Секреты вводятся только как reference. Значение секрета не должно возвращаться в API/DOM.</p>
+            </div>
+        </div>
+
+        <div class="form-grid">
+            <label>
+                <span>Код</span>
+                <input @bind="newSourceCode" placeholder="SIM-001" />
+            </label>
+            <label>
+                <span>Название</span>
+                <input @bind="newSourceName" placeholder="Simulator source" />
+            </label>
+            <label>
+                <span>Протокол</span>
+                <select @bind="newSourceProtocol">
+                    @foreach (var protocol in ProtocolOptions)
+                    {
+                        <option value="@protocol">@protocol</option>
+                    }
+                </select>
+            </label>
+            <label>
+                <span>Endpoint</span>
+                <input @bind="newSourceEndpoint" placeholder="simulator://source-1" />
+            </label>
+            <label>
+                <span>Schema version</span>
+                <input type="number" min="1" @bind="newSourceSchemaVersion" />
+            </label>
+            <label>
+                <span>Secret reference</span>
+                <input @bind="newSourceSecretReference" placeholder="secret://telemetry/source-1" />
+            </label>
+            <label class="wide-field">
+                <span>Configuration JSON</span>
+                <input @bind="newSourceConfigurationJson" placeholder="{}" />
+            </label>
+            <label class="wide-field">
+                <span>Описание</span>
+                <input @bind="newSourceDescription" placeholder="Необязательно" />
+            </label>
+        </div>
+
+        <button type="button" class="primary-button" @onclick="CreateSourceAsync" disabled="@isBusy">Создать источник</button>
+    </section>
+
+    <section class="content-panel">
+        <div class="panel-heading-row">
+            <div>
+                <h2>Создать DataPoint</h2>
+                <p>DataPoint — продуктовый параметр оборудования. Protocol mapping создается отдельно.</p>
+            </div>
+        </div>
+
+        @if (ActiveEquipment.Count == 0)
+        {
+            <div class="empty-state compact-empty">
+                <h2>Нет активного оборудования</h2>
+                <p>Сначала создай оборудование на странице <a href="/equipment">/equipment</a>.</p>
+            </div>
+        }
+        else
+        {
+            <div class="form-grid">
+                <label>
+                    <span>Оборудование</span>
+                    <select @bind="newPointEquipmentIdText">
+                        @foreach (var item in ActiveEquipment)
+                        {
+                            <option value="@item.Id">@item.Code · @item.Name</option>
+                        }
+                    </select>
+                </label>
+                <label>
+                    <span>Код</span>
+                    <input @bind="newPointCode" placeholder="PUMP-001.TEMP" />
+                </label>
+                <label>
+                    <span>Название</span>
+                    <input @bind="newPointName" placeholder="Температура" />
+                </label>
+                <label>
+                    <span>Тип значения</span>
+                    <select @bind="newPointValueKind">
+                        @foreach (var kind in ValueKindOptions)
+                        {
+                            <option value="@kind">@kind</option>
+                        }
+                    </select>
+                </label>
+                <label>
+                    <span>Unit</span>
+                    <input @bind="newPointUnit" placeholder="C" />
+                </label>
+                <label>
+                    <span>Freshness, seconds</span>
+                    <input type="number" min="1" @bind="newPointFreshnessTimeoutSeconds" />
+                </label>
+                <label class="wide-field">
+                    <span>Описание</span>
+                    <input @bind="newPointDescription" placeholder="Необязательно" />
+                </label>
+            </div>
+
+            <button type="button" class="primary-button" @onclick="CreateDataPointAsync" disabled="@isBusy">Создать DataPoint</button>
+        }
+    </section>
+
+    <section class="content-panel">
+        <div class="panel-heading-row">
+            <div>
+                <h2>Создать protocol mapping</h2>
+                <p>Mapping связывает DataPoint с TelemetrySource. Протокол берется из выбранного источника.</p>
+            </div>
+        </div>
+
+        @if (ActiveSources.Count == 0 || ActiveDataPoints.Count == 0)
+        {
+            <div class="empty-state compact-empty">
+                <h2>Недостаточно данных</h2>
+                <p>Нужен минимум один активный источник и один активный DataPoint.</p>
+            </div>
+        }
+        else
+        {
+            <div class="form-grid">
+                <label>
+                    <span>DataPoint</span>
+                    <select @bind="newMappingDataPointIdText">
+                        @foreach (var point in ActiveDataPoints)
+                        {
+                            <option value="@point.Id">@point.Code · @point.Name</option>
+                        }
+                    </select>
+                </label>
+                <label>
+                    <span>Источник</span>
+                    <select @bind="newMappingSourceIdText">
+                        @foreach (var source in ActiveSources)
+                        {
+                            <option value="@source.Id">@source.Code · @source.Protocol</option>
+                        }
+                    </select>
+                </label>
+                <label>
+                    <span>Schema version</span>
+                    <input type="number" min="1" @bind="newMappingSchemaVersion" />
+                </label>
+                <label class="wide-field">
+                    <span>Mapping JSON</span>
+                    <input @bind="newMappingJson" placeholder="{}" />
+                </label>
+            </div>
+
+            <button type="button" class="primary-button" @onclick="CreateMappingAsync" disabled="@isBusy">Создать mapping</button>
+        }
+    </section>
+
+    <section class="content-panel">
+        <div class="panel-heading-row">
+            <div>
+                <h2>Telemetry sources</h2>
+                <p>@SourceStatusText</p>
+            </div>
+            <label class="inline-toggle">
+                <input type="checkbox" @bind="includeArchived" @bind:after="ReloadAsync" />
+                <span>Показывать архив</span>
+            </label>
+        </div>
+
+        @if (isLoading)
+        {
+            <div class="empty-state compact-empty">
+                <h2>Загрузка</h2>
+                <p>Читаю configuration API.</p>
+            </div>
+        }
+        else if (sources.Count == 0)
+        {
+            <div class="empty-state compact-empty">
+                <h2>Источников пока нет</h2>
+                <p>Создай первый simulator source.</p>
+            </div>
+        }
+        else
+        {
+            <div class="equipment-list">
+                @foreach (var source in OrderedSources)
+                {
+                    <article class="equipment-row @(source.IsArchived ? "archived" : string.Empty)">
+                        <div class="equipment-main">
+                            <strong>@source.Name</strong>
+                            <span>@source.Code · @source.Protocol</span>
+                            <small>@source.Endpoint</small>
+                        </div>
+                        <div class="equipment-description">
+                            @(string.IsNullOrWhiteSpace(source.Description) ? "Описание не задано" : source.Description)
+                        </div>
+                        <div class="equipment-meta">
+                            <span>@(source.IsArchived ? "Архив" : source.IsEnabled ? "Enabled" : "Disabled")</span>
+                            <small>@(source.HasSecretReference ? source.MaskedSecretReference : "secret reference отсутствует")</small>
+                        </div>
+                        <div class="equipment-actions">
+                            @if (!source.IsArchived)
+                            {
+                                <button type="button" class="secondary-button" @onclick="() => ToggleSourceAsync(source)" disabled="@isBusy">@(source.IsEnabled ? "Disable" : "Enable")</button>
+                                <button type="button" class="danger-button" @onclick="() => ArchiveSourceAsync(source.Id)" disabled="@isBusy">В архив</button>
+                            }
+                            else
+                            {
+                                <button type="button" class="secondary-button" @onclick="() => RestoreSourceAsync(source.Id)" disabled="@isBusy">Вернуть</button>
+                            }
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+    </section>
+
+    <section class="content-panel">
+        <div class="panel-heading-row">
+            <div>
+                <h2>DataPoints</h2>
+                <p>@PointStatusText</p>
+            </div>
+        </div>
+
+        @if (dataPoints.Count == 0)
+        {
+            <div class="empty-state compact-empty">
+                <h2>DataPoint пока нет</h2>
+                <p>Создай первый параметр оборудования.</p>
+            </div>
+        }
+        else
+        {
+            <div class="equipment-list">
+                @foreach (var point in OrderedDataPoints)
+                {
+                    <article class="equipment-row @(point.IsArchived ? "archived" : string.Empty)">
+                        <div class="equipment-main">
+                            <strong>@point.Name</strong>
+                            <span>@point.Code · @point.ValueKind</span>
+                            <small>@EquipmentLabel(point.EquipmentId)</small>
+                        </div>
+                        <div class="equipment-description">
+                            Unit: @(string.IsNullOrWhiteSpace(point.Unit) ? "none" : point.Unit); freshness: @point.FreshnessTimeoutSeconds s
+                        </div>
+                        <div class="equipment-meta">
+                            <span>@(point.IsArchived ? "Архив" : "Активно")</span>
+                            <small>@point.UpdatedAtUtc.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</small>
+                        </div>
+                        <div class="equipment-actions">
+                            @if (!point.IsArchived)
+                            {
+                                <button type="button" class="danger-button" @onclick="() => ArchivePointAsync(point.Id)" disabled="@isBusy">В архив</button>
+                            }
+                            else
+                            {
+                                <button type="button" class="secondary-button" @onclick="() => RestorePointAsync(point.Id)" disabled="@isBusy">Вернуть</button>
+                            }
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+    </section>
+
+    <section class="content-panel">
+        <div class="panel-heading-row">
+            <div>
+                <h2>Protocol mappings</h2>
+                <p>@MappingStatusText</p>
+            </div>
+        </div>
+
+        @if (mappings.Count == 0)
+        {
+            <div class="empty-state compact-empty">
+                <h2>Mappings пока нет</h2>
+                <p>Создай связь DataPoint → TelemetrySource.</p>
+            </div>
+        }
+        else
+        {
+            <div class="equipment-list">
+                @foreach (var mapping in OrderedMappings)
+                {
+                    <article class="equipment-row @(mapping.IsArchived ? "archived" : string.Empty)">
+                        <div class="equipment-main">
+                            <strong>@DataPointLabel(mapping.DataPointId)</strong>
+                            <span>@mapping.Protocol · schema @mapping.MappingSchemaVersion</span>
+                            <small>@SourceLabel(mapping.TelemetrySourceId)</small>
+                        </div>
+                        <div class="equipment-description">
+                            @mapping.MappingJson
+                        </div>
+                        <div class="equipment-meta">
+                            <span>@(mapping.IsArchived ? "Архив" : "Активно")</span>
+                            <small>@mapping.UpdatedAtUtc.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</small>
+                        </div>
+                        <div class="equipment-actions">
+                            @if (!mapping.IsArchived)
+                            {
+                                <button type="button" class="danger-button" @onclick="() => ArchiveMappingAsync(mapping.Id)" disabled="@isBusy">В архив</button>
+                            }
+                            else
+                            {
+                                <button type="button" class="secondary-button" @onclick="() => RestoreMappingAsync(mapping.Id)" disabled="@isBusy">Вернуть</button>
+                            }
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+    </section>
+</section>
+
+@code {
+    private static readonly string[] ProtocolOptions = ["Simulator", "ModbusTcp", "Snmp"];
+    private static readonly string[] ValueKindOptions = ["Boolean", "Integer", "Decimal", "Text"];
+
+    private List<LocationDto> locations = [];
+    private List<EquipmentDto> equipment = [];
+    private List<TelemetrySourceDto> sources = [];
+    private List<DataPointDto> dataPoints = [];
+    private List<ProtocolMappingDto> mappings = [];
+
+    private string? errorMessage;
+    private bool isLoading = true;
+    private bool isBusy;
+    private bool includeArchived;
+
+    private string newSourceCode = "";
+    private string newSourceName = "";
+    private string newSourceProtocol = "Simulator";
+    private string newSourceEndpoint = "simulator://source-1";
+    private int newSourceSchemaVersion = 1;
+    private string newSourceConfigurationJson = "{}";
+    private string? newSourceSecretReference;
+    private string? newSourceDescription;
+
+    private string newPointEquipmentIdText = "";
+    private string newPointCode = "";
+    private string newPointName = "";
+    private string newPointValueKind = "Decimal";
+    private string? newPointUnit = "C";
+    private int newPointFreshnessTimeoutSeconds = 60;
+    private string? newPointDescription;
+
+    private string newMappingDataPointIdText = "";
+    private string newMappingSourceIdText = "";
+    private int newMappingSchemaVersion = 1;
+    private string newMappingJson = "{}";
+
+    private IReadOnlyList<EquipmentDto> ActiveEquipment => equipment
+        .Where(item => !item.IsArchived)
+        .OrderBy(item => item.Code, StringComparer.OrdinalIgnoreCase)
+        .ToArray();
+
+    private IReadOnlyList<TelemetrySourceDto> ActiveSources => sources
+        .Where(item => !item.IsArchived)
+        .OrderBy(item => item.Code, StringComparer.OrdinalIgnoreCase)
+        .ToArray();
+
+    private IReadOnlyList<DataPointDto> ActiveDataPoints => dataPoints
+        .Where(item => !item.IsArchived)
+        .OrderBy(item => item.Code, StringComparer.OrdinalIgnoreCase)
+        .ToArray();
+
+    private IEnumerable<TelemetrySourceDto> OrderedSources => sources.OrderBy(item => item.Code, StringComparer.OrdinalIgnoreCase);
+
+    private IEnumerable<DataPointDto> OrderedDataPoints => dataPoints.OrderBy(item => item.Code, StringComparer.OrdinalIgnoreCase);
+
+    private IEnumerable<ProtocolMappingDto> OrderedMappings => mappings.OrderBy(item => DataPointLabel(item.DataPointId), StringComparer.OrdinalIgnoreCase);
+
+    private string SourceStatusText => sources.Count == 0 ? "Нет источников." : $"Всего: {sources.Count}; активных: {sources.Count(item => !item.IsArchived)}.";
+
+    private string PointStatusText => dataPoints.Count == 0 ? "Нет DataPoint." : $"Всего: {dataPoints.Count}; активных: {dataPoints.Count(item => !item.IsArchived)}.";
+
+    private string MappingStatusText => mappings.Count == 0 ? "Нет mappings." : $"Всего: {mappings.Count}; активных: {mappings.Count(item => !item.IsArchived)}.";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ReloadAsync();
+    }
+
+    private async Task ReloadAsync()
+    {
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            locations = (await Api.GetLocationsAsync(includeArchived: true)).ToList();
+            equipment = (await Api.GetEquipmentAsync(locationId: null, includeArchived: true)).ToList();
+            sources = (await Api.GetTelemetrySourcesAsync(includeArchived)).ToList();
+            dataPoints = (await Api.GetDataPointsAsync(equipmentId: null, includeArchived)).ToList();
+            mappings = (await Api.GetProtocolMappingsAsync(dataPointId: null, telemetrySourceId: null, includeArchived)).ToList();
+            EnsureDefaultSelections();
+        }
+        catch (Exception exception)
+        {
+            errorMessage = ToUserMessage(exception);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task CreateSourceAsync()
+    {
+        if (string.IsNullOrWhiteSpace(newSourceCode) || string.IsNullOrWhiteSpace(newSourceName) || string.IsNullOrWhiteSpace(newSourceEndpoint))
+        {
+            errorMessage = "Код, название и endpoint обязательны.";
+            return;
+        }
+
+        await RunBusyAsync(async () =>
+        {
+            await Api.CreateTelemetrySourceAsync(new CreateTelemetrySourceRequest(
+                newSourceCode.Trim(),
+                newSourceName.Trim(),
+                newSourceProtocol,
+                newSourceEndpoint.Trim(),
+                Math.Max(1, newSourceSchemaVersion),
+                NormalizeJson(newSourceConfigurationJson),
+                BlankToNull(newSourceSecretReference),
+                BlankToNull(newSourceDescription)));
+
+            newSourceCode = string.Empty;
+            newSourceName = string.Empty;
+            newSourceDescription = null;
+            await ReloadAsync();
+        });
+    }
+
+    private async Task CreateDataPointAsync()
+    {
+        if (string.IsNullOrWhiteSpace(newPointEquipmentIdText))
+        {
+            errorMessage = "Выбери оборудование.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(newPointCode) || string.IsNullOrWhiteSpace(newPointName))
+        {
+            errorMessage = "Код и название DataPoint обязательны.";
+            return;
+        }
+
+        await RunBusyAsync(async () =>
+        {
+            await Api.CreateDataPointAsync(new CreateDataPointRequest(
+                Guid.Parse(newPointEquipmentIdText),
+                newPointCode.Trim(),
+                newPointName.Trim(),
+                newPointValueKind,
+                BlankToNull(newPointUnit),
+                Math.Max(1, newPointFreshnessTimeoutSeconds),
+                BlankToNull(newPointDescription)));
+
+            newPointCode = string.Empty;
+            newPointName = string.Empty;
+            newPointDescription = null;
+            await ReloadAsync();
+        });
+    }
+
+    private async Task CreateMappingAsync()
+    {
+        if (string.IsNullOrWhiteSpace(newMappingDataPointIdText) || string.IsNullOrWhiteSpace(newMappingSourceIdText))
+        {
+            errorMessage = "Выбери DataPoint и источник.";
+            return;
+        }
+
+        var source = ActiveSources.FirstOrDefault(item => item.Id.ToString() == newMappingSourceIdText);
+        if (source is null)
+        {
+            errorMessage = "Источник не найден.";
+            return;
+        }
+
+        await RunBusyAsync(async () =>
+        {
+            await Api.CreateProtocolMappingAsync(new CreateProtocolMappingRequest(
+                Guid.Parse(newMappingDataPointIdText),
+                source.Id,
+                source.Protocol,
+                Math.Max(1, newMappingSchemaVersion),
+                NormalizeJson(newMappingJson)));
+
+            await ReloadAsync();
+        });
+    }
+
+    private async Task ToggleSourceAsync(TelemetrySourceDto source)
+    {
+        await RunBusyAsync(async () =>
+        {
+            if (source.IsEnabled)
+            {
+                await Api.DisableTelemetrySourceAsync(source.Id, new TelemetrySourceActionRequest("Disabled from Step 9C web UI."));
+            }
+            else
+            {
+                await Api.EnableTelemetrySourceAsync(source.Id, new TelemetrySourceActionRequest("Enabled from Step 9C web UI."));
+            }
+
+            await ReloadAsync();
+        });
+    }
+
+    private async Task ArchiveSourceAsync(Guid id)
+    {
+        await RunBusyAsync(async () =>
+        {
+            await Api.ArchiveTelemetrySourceAsync(id, new TelemetrySourceActionRequest("Archived from Step 9C web UI."));
+            await ReloadAsync();
+        });
+    }
+
+    private async Task RestoreSourceAsync(Guid id)
+    {
+        await RunBusyAsync(async () =>
+        {
+            await Api.RestoreTelemetrySourceAsync(id, new TelemetrySourceActionRequest("Restored from Step 9C web UI."));
+            await ReloadAsync();
+        });
+    }
+
+    private async Task ArchivePointAsync(Guid id)
+    {
+        await RunBusyAsync(async () =>
+        {
+            await Api.ArchiveDataPointAsync(id, new DataPointActionRequest("Archived from Step 9C web UI."));
+            await ReloadAsync();
+        });
+    }
+
+    private async Task RestorePointAsync(Guid id)
+    {
+        await RunBusyAsync(async () =>
+        {
+            await Api.RestoreDataPointAsync(id, new DataPointActionRequest("Restored from Step 9C web UI."));
+            await ReloadAsync();
+        });
+    }
+
+    private async Task ArchiveMappingAsync(Guid id)
+    {
+        await RunBusyAsync(async () =>
+        {
+            await Api.ArchiveProtocolMappingAsync(id, new ProtocolMappingActionRequest("Archived from Step 9C web UI."));
+            await ReloadAsync();
+        });
+    }
+
+    private async Task RestoreMappingAsync(Guid id)
+    {
+        await RunBusyAsync(async () =>
+        {
+            await Api.RestoreProtocolMappingAsync(id, new ProtocolMappingActionRequest("Restored from Step 9C web UI."));
+            await ReloadAsync();
+        });
+    }
+
+    private async Task RunBusyAsync(Func<Task> operation)
+    {
+        isBusy = true;
+        errorMessage = null;
+
+        try
+        {
+            await operation();
+        }
+        catch (Exception exception)
+        {
+            errorMessage = ToUserMessage(exception);
+        }
+        finally
+        {
+            isBusy = false;
+        }
+    }
+
+    private void EnsureDefaultSelections()
+    {
+        if (string.IsNullOrWhiteSpace(newPointEquipmentIdText) || ActiveEquipment.All(item => item.Id.ToString() != newPointEquipmentIdText))
+        {
+            newPointEquipmentIdText = ActiveEquipment.FirstOrDefault()?.Id.ToString() ?? string.Empty;
+        }
+
+        if (string.IsNullOrWhiteSpace(newMappingDataPointIdText) || ActiveDataPoints.All(item => item.Id.ToString() != newMappingDataPointIdText))
+        {
+            newMappingDataPointIdText = ActiveDataPoints.FirstOrDefault()?.Id.ToString() ?? string.Empty;
+        }
+
+        if (string.IsNullOrWhiteSpace(newMappingSourceIdText) || ActiveSources.All(item => item.Id.ToString() != newMappingSourceIdText))
+        {
+            newMappingSourceIdText = ActiveSources.FirstOrDefault()?.Id.ToString() ?? string.Empty;
+        }
+    }
+
+    private string EquipmentLabel(Guid id)
+    {
+        var item = equipment.FirstOrDefault(candidate => candidate.Id == id);
+        return item is null ? "Оборудование недоступно" : $"{item.Code} · {item.Name}";
+    }
+
+    private string DataPointLabel(Guid id)
+    {
+        var item = dataPoints.FirstOrDefault(candidate => candidate.Id == id);
+        return item is null ? "DataPoint недоступен" : $"{item.Code} · {item.Name}";
+    }
+
+    private string SourceLabel(Guid id)
+    {
+        var item = sources.FirstOrDefault(candidate => candidate.Id == id);
+        return item is null ? "Источник недоступен" : $"{item.Code} · {item.Protocol}";
+    }
+
+    private static string NormalizeJson(string? value)
+    {
+        return string.IsNullOrWhiteSpace(value) ? "{}" : value.Trim();
+    }
+
+    private static string? BlankToNull(string? value)
+    {
+        return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+    }
+
+    private static string ToUserMessage(Exception exception)
+    {
+        return exception switch
+        {
+            DispatcherApiException apiException => $"API вернул {(int)apiException.StatusCode}: {apiException.ResponseBody}",
+            HttpRequestException => "API недоступен. Запусти Dispatcher.Api на http://localhost:5076.",
+            _ => exception.Message
+        };
+    }
+}

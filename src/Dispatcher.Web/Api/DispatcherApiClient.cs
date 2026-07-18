@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using Dispatcher.Contracts.Assets;
+using Dispatcher.Contracts.Telemetry;
 
 namespace Dispatcher.Web.Api;
 
@@ -76,6 +77,119 @@ public sealed class DispatcherApiClient(HttpClient httpClient)
     {
         using var response = await httpClient.PostAsJsonAsync($"/api/equipment/{id}/restore", request, cancellationToken);
         return await ReadRequiredAsync<EquipmentDto>(response, cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<TelemetrySourceDto>> GetTelemetrySourcesAsync(bool includeArchived, CancellationToken cancellationToken = default)
+    {
+        var url = includeArchived ? "/api/telemetry-sources?includeArchived=true" : "/api/telemetry-sources";
+        return await httpClient.GetFromJsonAsync<TelemetrySourceDto[]>(url, cancellationToken) ?? [];
+    }
+
+    public async Task<TelemetrySourceDto> CreateTelemetrySourceAsync(CreateTelemetrySourceRequest request, CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.PostAsJsonAsync("/api/telemetry-sources", request, cancellationToken);
+        return await ReadRequiredAsync<TelemetrySourceDto>(response, cancellationToken);
+    }
+
+    public async Task<TelemetrySourceDto> EnableTelemetrySourceAsync(Guid id, TelemetrySourceActionRequest request, CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.PostAsJsonAsync($"/api/telemetry-sources/{id}/enable", request, cancellationToken);
+        return await ReadRequiredAsync<TelemetrySourceDto>(response, cancellationToken);
+    }
+
+    public async Task<TelemetrySourceDto> DisableTelemetrySourceAsync(Guid id, TelemetrySourceActionRequest request, CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.PostAsJsonAsync($"/api/telemetry-sources/{id}/disable", request, cancellationToken);
+        return await ReadRequiredAsync<TelemetrySourceDto>(response, cancellationToken);
+    }
+
+    public async Task<TelemetrySourceDto> ArchiveTelemetrySourceAsync(Guid id, TelemetrySourceActionRequest request, CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.PostAsJsonAsync($"/api/telemetry-sources/{id}/archive", request, cancellationToken);
+        return await ReadRequiredAsync<TelemetrySourceDto>(response, cancellationToken);
+    }
+
+    public async Task<TelemetrySourceDto> RestoreTelemetrySourceAsync(Guid id, TelemetrySourceActionRequest request, CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.PostAsJsonAsync($"/api/telemetry-sources/{id}/restore", request, cancellationToken);
+        return await ReadRequiredAsync<TelemetrySourceDto>(response, cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<DataPointDto>> GetDataPointsAsync(Guid? equipmentId, bool includeArchived, CancellationToken cancellationToken = default)
+    {
+        var query = new List<string>();
+
+        if (equipmentId.HasValue)
+        {
+            query.Add($"equipmentId={Uri.EscapeDataString(equipmentId.Value.ToString())}");
+        }
+
+        if (includeArchived)
+        {
+            query.Add("includeArchived=true");
+        }
+
+        var url = query.Count == 0 ? "/api/data-points" : $"/api/data-points?{string.Join('&', query)}";
+        return await httpClient.GetFromJsonAsync<DataPointDto[]>(url, cancellationToken) ?? [];
+    }
+
+    public async Task<DataPointDto> CreateDataPointAsync(CreateDataPointRequest request, CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.PostAsJsonAsync("/api/data-points", request, cancellationToken);
+        return await ReadRequiredAsync<DataPointDto>(response, cancellationToken);
+    }
+
+    public async Task<DataPointDto> ArchiveDataPointAsync(Guid id, DataPointActionRequest request, CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.PostAsJsonAsync($"/api/data-points/{id}/archive", request, cancellationToken);
+        return await ReadRequiredAsync<DataPointDto>(response, cancellationToken);
+    }
+
+    public async Task<DataPointDto> RestoreDataPointAsync(Guid id, DataPointActionRequest request, CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.PostAsJsonAsync($"/api/data-points/{id}/restore", request, cancellationToken);
+        return await ReadRequiredAsync<DataPointDto>(response, cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<ProtocolMappingDto>> GetProtocolMappingsAsync(Guid? dataPointId, Guid? telemetrySourceId, bool includeArchived, CancellationToken cancellationToken = default)
+    {
+        var query = new List<string>();
+
+        if (dataPointId.HasValue)
+        {
+            query.Add($"dataPointId={Uri.EscapeDataString(dataPointId.Value.ToString())}");
+        }
+
+        if (telemetrySourceId.HasValue)
+        {
+            query.Add($"telemetrySourceId={Uri.EscapeDataString(telemetrySourceId.Value.ToString())}");
+        }
+
+        if (includeArchived)
+        {
+            query.Add("includeArchived=true");
+        }
+
+        var url = query.Count == 0 ? "/api/protocol-mappings" : $"/api/protocol-mappings?{string.Join('&', query)}";
+        return await httpClient.GetFromJsonAsync<ProtocolMappingDto[]>(url, cancellationToken) ?? [];
+    }
+
+    public async Task<ProtocolMappingDto> CreateProtocolMappingAsync(CreateProtocolMappingRequest request, CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.PostAsJsonAsync("/api/protocol-mappings", request, cancellationToken);
+        return await ReadRequiredAsync<ProtocolMappingDto>(response, cancellationToken);
+    }
+
+    public async Task<ProtocolMappingDto> ArchiveProtocolMappingAsync(Guid id, ProtocolMappingActionRequest request, CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.PostAsJsonAsync($"/api/protocol-mappings/{id}/archive", request, cancellationToken);
+        return await ReadRequiredAsync<ProtocolMappingDto>(response, cancellationToken);
+    }
+
+    public async Task<ProtocolMappingDto> RestoreProtocolMappingAsync(Guid id, ProtocolMappingActionRequest request, CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.PostAsJsonAsync($"/api/protocol-mappings/{id}/restore", request, cancellationToken);
+        return await ReadRequiredAsync<ProtocolMappingDto>(response, cancellationToken);
     }
 
     private static async Task<T> ReadRequiredAsync<T>(HttpResponseMessage response, CancellationToken cancellationToken)
