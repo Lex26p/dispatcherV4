@@ -6,7 +6,7 @@
 
 Репозиторий очищен от учебного кода и переведен на промышленный baseline.
 
-Текущий шаг: **Step 2 — shared contracts and API correlation**.
+Текущий шаг: **Step 3 — domain primitives**.
 
 ## Источники истины
 
@@ -27,6 +27,16 @@
 - `Dispatcher.UnitTests`
 - `Dispatcher.IntegrationTests`
 
+## Step 3 primitives
+
+- `EntityId`
+- `DomainError`
+- `UtcTimestamp`
+- `ConcurrencyToken`
+- `DataQuality`
+- `FreshnessState`
+- `TypedValue`
+
 ## Проверка
 
 ```powershell
@@ -46,8 +56,8 @@ dotnet run --project .\src\Dispatcher.Api\Dispatcher.Api.csproj
 Проверить в другом окне:
 
 ```powershell
-Invoke-WebRequest http://localhost:5076/api/health/live | Select-Object StatusCode,Headers
-Invoke-WebRequest -Headers @{ 'X-Correlation-ID' = 'manual-step-02' } http://localhost:5076/api/health/ready | Select-Object StatusCode,Headers
+Invoke-WebRequest http://localhost:5076/api/health/live -UseBasicParsing | Select-Object StatusCode,Headers
+Invoke-WebRequest -Headers @{ 'X-Correlation-ID' = 'manual-step-02' } http://localhost:5076/api/health/ready -UseBasicParsing | Select-Object StatusCode,Headers
 ```
 
 ## Важные правила
