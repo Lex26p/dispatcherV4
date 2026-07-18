@@ -22,6 +22,9 @@ public static class PermissionNames
     public const string TelemetryConfigurationView = "telemetry.configuration.view";
     public const string TelemetryConfigurationManage = "telemetry.configuration.manage";
 
+    public const string TelemetryValuesView = "telemetry.values.view";
+    public const string TelemetryValuesManage = "telemetry.values.manage";
+
     public static IReadOnlyList<string> All { get; } =
     [
         IdentityMeView,
@@ -38,5 +41,7 @@ public static class PermissionNames
         EquipmentManage,
         TelemetryConfigurationView,
         TelemetryConfigurationManage,
+        TelemetryValuesView,
+        TelemetryValuesManage,
     ];
 }

@@ -2,6 +2,7 @@ using Dispatcher.Application.Abstractions;
 using Dispatcher.Application.Assets.Equipment;
 using Dispatcher.Application.Assets.Locations;
 using Dispatcher.Application.Telemetry.Configuration;
+using Dispatcher.Application.Telemetry.Values;
 using Dispatcher.Infrastructure.Assets;
 using Dispatcher.Infrastructure.Persistence;
 using Dispatcher.Infrastructure.Telemetry;
@@ -22,6 +23,7 @@ public static class DependencyInjection
         services.AddScoped<ILocationRepository, EfLocationRepository>();
         services.AddScoped<IEquipmentRepository, EfEquipmentRepository>();
         services.AddScoped<ITelemetryConfigurationRepository, EfTelemetryConfigurationRepository>();
+        services.AddScoped<ITelemetryValueRepository, EfTelemetryValueRepository>();
 
         return services;
     }

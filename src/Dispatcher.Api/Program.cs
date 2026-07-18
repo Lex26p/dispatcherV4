@@ -49,6 +49,7 @@ app.MapIdentityEndpoints();
 app.MapLocationEndpoints();
 app.MapEquipmentEndpoints();
 app.MapTelemetryConfigurationEndpoints();
+app.MapTelemetryValueEndpoints();
 
 if (app.Environment.IsDevelopment())
 {

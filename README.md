@@ -15,3 +15,8 @@ Added:
 - integration model smoke for current/history value tables
 
 This step does not add current values API, SignalR, polling workers, history UI, or realtime delivery.
+
+
+## Step 10B
+- Added Current Values REST API baseline.
+- Commit: pending.
