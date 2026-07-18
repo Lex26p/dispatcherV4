@@ -1,4 +1,6 @@
 using Dispatcher.Application.Abstractions;
+using Dispatcher.Application.Assets.Locations;
+using Dispatcher.Infrastructure.Assets;
 using Dispatcher.Infrastructure.Persistence;
 using Dispatcher.Infrastructure.Time;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +16,7 @@ public static class DependencyInjection
 
         services.AddSingleton<IClock, SystemClock>();
         services.AddDbContext<DispatcherDbContext>(options => options.UseNpgsql(dispatcherDatabaseConnectionString));
+        services.AddScoped<ILocationRepository, EfLocationRepository>();
 
         return services;
     }

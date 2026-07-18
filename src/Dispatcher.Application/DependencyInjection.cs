@@ -1,4 +1,5 @@
 using Dispatcher.Application.Abstractions;
+using Dispatcher.Application.Assets.Locations;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Dispatcher.Application;
@@ -9,6 +10,7 @@ public static class DependencyInjection
     {
         services.AddScoped<ICorrelationContext, CorrelationContext>();
         services.AddScoped<ICurrentUser, AnonymousCurrentUser>();
+        services.AddScoped<ILocationService, LocationService>();
 
         return services;
     }

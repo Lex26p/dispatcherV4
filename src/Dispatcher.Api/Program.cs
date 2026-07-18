@@ -1,5 +1,6 @@
 using Dispatcher.Api.Configuration;
 using Dispatcher.Api.Endpoints;
+using Dispatcher.Api.Endpoints.Locations;
 using Dispatcher.Api.Middleware;
 using Dispatcher.Api.Security;
 using Dispatcher.Application;
@@ -23,6 +24,7 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.MapGet("/", () => Results.Redirect("/api/health/live"));
 app.MapHealthEndpoints();
 app.MapIdentityEndpoints();
+app.MapLocationEndpoints();
 
 if (app.Environment.IsDevelopment())
 {

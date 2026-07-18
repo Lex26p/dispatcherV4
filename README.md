@@ -39,3 +39,7 @@ dotnet tool run dotnet-ef database update --project .\src\Dispatcher.Infrastruct
 - Не смешивать Location с Equipment или protocol endpoint.
 - Не добавлять API/UI в Step 7A.
 - После каждого шага обновлять `PROJECT_STATE.md`.
+
+## Current implementation status
+
+- Step 7B: Locations API/application layer added. Web UI for Locations is deferred to Step 7C.

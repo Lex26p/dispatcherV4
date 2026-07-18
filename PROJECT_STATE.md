@@ -153,3 +153,11 @@
 - This is an intentionally smaller substep.
 - Adds only Location domain/persistence/migration/tests.
 - Locations API and UI are deferred to Step 7B and Step 7C.
+
+## Step 7B — Locations API and application layer
+
+- Status: In progress until local build/test/API smoke/commit.
+- Previous step hash: 86aad3e8386c783646064624f82519b1b5e43611.
+- Adds contracts, application service, repository boundary, EF repository, REST endpoints and permissions for Locations.
+- Web UI is deferred.
+
